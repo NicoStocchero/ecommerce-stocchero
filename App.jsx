@@ -1,69 +1,43 @@
-import { StyleSheet, View, FlatList, Image, Text } from "react-native";
-import Header from "./src/components/Header";
-import FlatCard from "./src/components/FlatCard";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Categories from "./src/screens/Categories";
+import Products from "./src/screens/Products";
+import { useFonts } from "expo-font";
+import { useEffect } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import ProductDetail from "./src/screens/ProductDetail";
 
-import categories from "./src/data/categories.json";
-import { colors } from "./src/global/colors";
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const renderCategoryItem = ({ item }) => (
-    <FlatCard>
-      <View style={styles.categoryItem}>
-        <Image
-          source={{ uri: item.image }}
-          style={styles.image}
-          resizeMode="contain"
-        />
-        <Text style={styles.title}>{item.title}</Text>
-      </View>
-    </FlatCard>
-  );
+  const [fontsLoaded, error] = useFonts({
+    "Inter-Regular": require("./assets/fonts/Inter_18pt-Regular.ttf"),
+    "Inter-Bold": require("./assets/fonts/Inter_18pt-Bold.ttf"),
+    "Inter-Medium": require("./assets/fonts/Inter_18pt-Medium.ttf"),
+    "Inter-SemiBold": require("./assets/fonts/Inter_18pt-SemiBold.ttf"),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || error) {
+      SplashScreen.hide();
+    }
+  }, [fontsLoaded, error]);
+
+  if (!fontsLoaded && !error) {
+    return null;
+  }
+
   return (
-    <>
-      <View style={styles.container}>
-        <Header title="Marketplace" />
-        <FlatList
-          data={categories}
-          renderItem={renderCategoryItem}
-          keyExtractor={(item) => item.id.toString()}
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Categories" component={Categories} />
+        <Stack.Screen name="Products" component={Products} />
+        <Stack.Screen
+          name="ProductDetail"
+          component={ProductDetail}
+          options={{ headerTitle: "" }}
         />
-      </View>
-    </>
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
-    paddingTop: 40,
-  },
-  categoryItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.white,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 2,
-    marginRight: 10,
-  },
-  image: {
-    width: 50,
-    height: 50,
-    borderRadius: 10,
-    marginRight: 10,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.black,
-    textAlign: "left",
-    marginLeft: 10,
-  },
-});

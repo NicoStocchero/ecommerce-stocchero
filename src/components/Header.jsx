@@ -12,12 +12,11 @@ export default function Header({ title }) {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.white,
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lightGray,
+    padding: 12,
     borderRadius: 10,
     borderBottomWidth: 1,
-    borderBottomColor: colors.lightGray,
+    borderBottomColor: colors.primary,
+    marginBottom: 12,
   },
   title: {
     color: colors.black,
