@@ -30,10 +30,13 @@ export const colors = {
   warning: "#f9a825",
   info: "#0288d1",
 
-  // Colores especiales (para descuentos, destacados, etc.)
   discount: "#ff5252", // Rojo coral para % OFF
   highlight: "#e3f2fd", // Fondo suave con azul claro
 
   // Transparencias útiles
   overlay: "rgba(0,0,0,0.4)",
+
+  // Agregados para ESLint
+  shadow: "#000000", // Para shadowColor
+  textPrimary: "#1a1a1a", // Para textos principales
 };

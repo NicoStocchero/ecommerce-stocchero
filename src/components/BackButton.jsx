@@ -1,7 +1,8 @@
+// src/components/BackButton.jsx
 import { Pressable, Text, StyleSheet, Platform } from "react-native";
-import { colors } from "../global/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { colors } from "../global/colors";
 
 const BackButton = () => {
   const navigation = useNavigation();
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   text: {
-    color: "white",
+    color: colors.white,
     fontWeight: "600",
   },
 });

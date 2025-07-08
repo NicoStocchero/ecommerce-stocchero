@@ -1,16 +1,28 @@
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View, Pressable, Alert } from "react-native";
 import React, { useState } from "react";
-import { colors } from "../global/colors"; // Asegurate de tener este import si usás colores globales
+import { colors } from "../global/colors";
 
-const ButtonCount = () => {
-  const [count, setCount] = useState(1);
+const ButtonCount = ({ onQuantityChange, initial = 1, stock = 10 }) => {
+  const [count, setCount] = useState(initial);
 
   const handleIncrement = () => {
-    setCount((prev) => prev + 1);
+    if (count + 1 > stock) {
+      Alert.alert("Stock insuficiente", "No hay más stock disponible.");
+      return;
+    }
+    const newCount = count + 1;
+    setCount(newCount);
+    if (onQuantityChange) onQuantityChange(newCount);
   };
 
   const handleDecrement = () => {
-    if (count > 1) setCount((prev) => prev - 1);
+    if (count > 1) {
+      const newCount = count - 1;
+      setCount(newCount);
+      if (onQuantityChange) onQuantityChange(newCount);
+    } else {
+      Alert.alert("Cantidad mínima", "Debe ser al menos 1 unidad.");
+    }
   };
 
   return (

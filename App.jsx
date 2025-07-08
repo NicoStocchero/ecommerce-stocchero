@@ -1,19 +1,22 @@
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Categories from "./src/screens/Categories";
-import Products from "./src/screens/Products";
+// App.jsx
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
-import ProductDetail from "./src/screens/ProductDetail";
+import { NavigationContainer } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
+import { Provider } from "react-redux";
+import TabNavigator from "./navigation/TabNavigator";
+import store from "./src/store/store";
 
-const Stack = createNativeStackNavigator();
-
-export default function App() {
+const App = () => {
   const [fontsLoaded, error] = useFonts({
+    // eslint-disable-next-line global-require
     "Inter-Regular": require("./assets/fonts/Inter_18pt-Regular.ttf"),
+    // eslint-disable-next-line global-require
     "Inter-Bold": require("./assets/fonts/Inter_18pt-Bold.ttf"),
+    // eslint-disable-next-line global-require
     "Inter-Medium": require("./assets/fonts/Inter_18pt-Medium.ttf"),
+    // eslint-disable-next-line global-require
     "Inter-SemiBold": require("./assets/fonts/Inter_18pt-SemiBold.ttf"),
   });
 
@@ -28,16 +31,13 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Categories" component={Categories} />
-        <Stack.Screen name="Products" component={Products} />
-        <Stack.Screen
-          name="ProductDetail"
-          component={ProductDetail}
-          options={{ headerTitle: "" }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <StatusBar style={{ backgroundColor: "auto" }} />
+        <TabNavigator />
+      </NavigationContainer>
+    </Provider>
   );
-}
+};
+
+export default App;

@@ -1,27 +1,55 @@
-import React, { useState } from "react";
+// src/screens/Shop/Categories.jsx
+import React from "react";
 import { Text, StyleSheet, View, FlatList, Pressable } from "react-native";
 import { Image } from "expo-image";
-import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import FlatCard from "../../components/FlatCard";
+import Search from "../../components/Search";
+import { colors } from "../../global/colors";
+import {
+  setSelectedCategory,
+  setProductsFiltered,
+  setSearchKeyword,
+} from "../../features/shop/shopSlice";
 
-import categories from "../data/categories.json";
-import FlatCard from "../components/FlatCard";
-import Search from "../components/Search";
-import { colors } from "../global/colors";
+const EmptyComponent = ({ keyword }) => (
+  <View style={styles.emptyContainer}>
+    <Text style={styles.emptyText}>
+      {keyword
+        ? "No hay categorías que coincidan con tu búsqueda"
+        : "No hay categorías disponibles"}
+    </Text>
+  </View>
+);
 
-const Categories = () => {
-  const [keyword, setKeyword] = useState("");
-  const navigation = useNavigation();
+const Categories = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const categories = useSelector((state) => state.shop.categories);
+  const products = useSelector((state) => state.shop.products);
+  const keyword = useSelector((state) => state.shop.searchKeyword);
+
+  // Cuando el usuario escribe:
+  const handleSearch = (text) => {
+    dispatch(setSearchKeyword(text));
+    const filtered = products.filter((product) =>
+      product.title.toLowerCase().includes(text.toLowerCase())
+    );
+    dispatch(setProductsFiltered(filtered));
+  };
 
   const normalizedKeyword = keyword.trim().toLowerCase();
 
-  const filteredCategories = categories.filter((category) =>
-    category.title.toLowerCase().includes(normalizedKeyword)
-  );
+  const handleCategoryPress = (categoryId) => {
+    dispatch(setSelectedCategory(categoryId));
+    navigation.navigate("Products", { categoryId });
+  };
+
+  const filteredCategories = categories.filter((category) => {
+    return category.title.toLowerCase().includes(normalizedKeyword);
+  });
 
   const renderCategoryItem = ({ item }) => (
-    <Pressable
-      onPress={() => navigation.navigate("Products", { categoryId: item.id })}
-    >
+    <Pressable onPress={() => handleCategoryPress(item.id)}>
       <FlatCard>
         <View style={styles.categoryItem}>
           <Image
@@ -39,7 +67,7 @@ const Categories = () => {
 
   return (
     <View style={styles.container}>
-      <Search keyword={keyword} setKeyword={setKeyword} />
+      <Search keyword={keyword} setKeyword={handleSearch} />
       <FlatList
         data={filteredCategories}
         renderItem={renderCategoryItem}
@@ -47,15 +75,7 @@ const Categories = () => {
         contentContainerStyle={
           filteredCategories.length === 0 ? styles.emptyList : null
         }
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              {keyword
-                ? "No hay categorías que coincidan con tu búsqueda"
-                : "No hay categorías disponibles"}
-            </Text>
-          </View>
-        )}
+        ListEmptyComponent={<EmptyComponent keyword={keyword} />}
       />
     </View>
   );
@@ -76,9 +96,8 @@ const styles = StyleSheet.create({
     gap: 16,
     padding: 16,
     borderRadius: 16,
-    marginBottom: 12,
     backgroundColor: colors.gray100,
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 6,
@@ -95,7 +114,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter-SemiBold",
     fontSize: 17,
     lineHeight: 22,
-    color: colors.textPrimary || "#1a1a1a",
+    color: colors.textPrimary,
   },
   emptyContainer: {
     flex: 1,
@@ -107,7 +126,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter-Regular",
     fontSize: 16,
     lineHeight: 22,
-    color: colors.gray500 || "#999",
+    color: colors.gray500,
     textAlign: "center",
   },
   emptyList: {

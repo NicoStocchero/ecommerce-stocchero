@@ -1,9 +1,10 @@
-import { StyleSheet, View, Text, Image } from "react-native";
+// src/components/FlatCard.jsx
+import { StyleSheet, View } from "react-native";
 import { colors } from "../global/colors";
 
-const FlatCard = ({ children, style }) => {
-  return <View style={{ ...styles.container, ...style }}>{children}</View>;
-};
+const FlatCard = ({ children, style }) => (
+  <View style={{ ...styles.container, ...style }}>{children}</View>
+);
 
 export default FlatCard;
 
