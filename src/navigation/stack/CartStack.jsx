@@ -1,17 +1,19 @@
 // navigation/CartStack.jsx
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Cart } from '../../src/screens/Cart';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Cart } from "../../screens/Cart";
 
 const Stack = createNativeStackNavigator();
 
-export default function CartStack() {
+const CartStack = () => {
   return (
     <Stack.Navigator initialRouteName="Cart">
       <Stack.Screen
         name="Cart"
         component={Cart}
-        options={{ headerTitle: 'Carrito' }}
+        options={{ headerTitle: "Carrito" }}
       />
     </Stack.Navigator>
   );
-}
+};
+
+export default CartStack;

@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { useWindowDimensions } from "react-native";
 import { ShopStack, CartStack, OrderStack } from "./stack";
-import { colors } from "../src/global/colors";
+import colors from "../global/colors";
 
 // Mover componentes fuera del render para evitar recreación
 const TabBarIcon = ({ name, color, size }) => (
@@ -13,7 +13,7 @@ const TabBarIcon = ({ name, color, size }) => (
 const ShopTabIcon = ({ focused, iconSize }) => (
   <TabBarIcon
     name={focused ? "storefront" : "storefront-outline"}
-    color={focused ? colors.primary : colors.gray800}
+    color={focused ? colors.primary : colors.gray}
     size={iconSize}
   />
 );
@@ -21,7 +21,7 @@ const ShopTabIcon = ({ focused, iconSize }) => (
 const CartTabIcon = ({ focused, iconSize }) => (
   <TabBarIcon
     name={focused ? "cart" : "cart-outline"}
-    color={focused ? colors.primary : colors.gray800}
+    color={focused ? colors.primary : colors.gray}
     size={iconSize}
   />
 );
@@ -29,7 +29,7 @@ const CartTabIcon = ({ focused, iconSize }) => (
 const OrderTabIcon = ({ focused, iconSize }) => (
   <TabBarIcon
     name={focused ? "receipt" : "receipt-outline"}
-    color={focused ? colors.primary : colors.gray800}
+    color={focused ? colors.primary : colors.gray}
     size={iconSize}
   />
 );
@@ -53,12 +53,24 @@ const TabNavigator = () => {
         tabBarInactiveTintColor: colors.gray,
         tabBarLabelStyle: {
           fontSize: labelFontSize,
+          fontFamily: "Inter_18pt-Medium",
         },
         tabBarItemStyle: {
           paddingVertical: tabPaddingVertical,
         },
         tabBarStyle: {
           height: tabBarHeight,
+          backgroundColor: colors.white,
+          borderTopWidth: 1,
+          borderTopColor: colors.lightGray,
+          elevation: 8,
+          shadowColor: colors.black,
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         },
       }}
     >
