@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, Pressable, Alert } from "react-native";
 import React, { useState } from "react";
-import { colors } from "../global/colors";
+import colors from "../global/colors";
 
 const ButtonCount = ({ onQuantityChange, initial = 1, stock = 10 }) => {
   const [count, setCount] = useState(initial);

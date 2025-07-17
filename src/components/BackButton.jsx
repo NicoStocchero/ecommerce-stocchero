@@ -2,7 +2,7 @@
 import { Pressable, Text, StyleSheet, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { colors } from "../global/colors";
+import colors from "../global/colors";
 
 const BackButton = () => {
   const navigation = useNavigation();

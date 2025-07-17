@@ -1,7 +1,7 @@
 import { View, TextInput, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { colors } from "../global/colors";
+import colors from "../global/colors";
 
 const Search = ({ keyword, setKeyword }) => {
   const [isFocused, setIsFocused] = useState(false);

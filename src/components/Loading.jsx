@@ -1,6 +1,6 @@
 // src/components/Loading.jsx
 import { View, ActivityIndicator, StyleSheet, Text } from "react-native";
-import { colors } from "../global/colors";
+import colors from "../global/colors";
 
 const Loading = ({
   text = "Cargando...",
