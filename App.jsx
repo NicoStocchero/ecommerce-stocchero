@@ -5,7 +5,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { Provider } from "react-redux";
 import RootNavigator from "./src/navigation/RootNavigator";
-import store from "./src/store/store";
+import { store } from "./src/store/store";
 
 const App = () => {
   const [fontsLoaded, error] = useFonts({
@@ -33,7 +33,7 @@ const App = () => {
 
   return (
     <Provider store={store}>
-      <StatusBar style={{ backgroundColor: "auto" }} />
+      <StatusBar />
       <RootNavigator />
     </Provider>
   );
