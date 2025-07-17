@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Reglas DRY para password (si querés exigir más en login, pero suele no hacer falta)
+// --- Reglas DRY para password ---
 export const passwordRules = z
   .string()
   .min(8, "Debe tener al menos 8 caracteres")
