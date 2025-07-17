@@ -1,9 +1,42 @@
-// src/components/BackButton.jsx
+/**
+ * @fileoverview Back navigation button component with platform-specific icons.
+ * Provides consistent back navigation with iOS and Android appropriate icons.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import { Pressable, Text, StyleSheet, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import colors from "../global/colors";
 
+/**
+ * Back navigation button component with platform-specific styling.
+ * Automatically detects platform and uses appropriate back icon (chevron for iOS, arrow for Android).
+ * Uses React Navigation's goBack() method for navigation.
+ *
+ * @component
+ * @returns {React.JSX.Element} Rendered back button with icon and text
+ *
+ * @example
+ * ```javascript
+ * // Basic usage in screen header
+ * const ProductDetailScreen = () => {
+ *   return (
+ *     <View>
+ *       <BackButton />
+ *       <Text>Product Details</Text>
+ *     </View>
+ *   );
+ * };
+ *
+ * // Used in custom header
+ * <View style={styles.header}>
+ *   <BackButton />
+ *   <Text style={styles.title}>Product Detail</Text>
+ * </View>
+ * ```
+ */
 const BackButton = () => {
   const navigation = useNavigation();
 

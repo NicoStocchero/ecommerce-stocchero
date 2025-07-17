@@ -1,8 +1,50 @@
+/**
+ * @fileoverview Search input component with focus states and icon.
+ * Provides a styled search input with Ionicons search icon and focus feedback.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import { View, TextInput, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import colors from "../global/colors";
 
+/**
+ * Search component props
+ * @typedef {Object} SearchProps
+ * @property {string} keyword - Current search keyword value
+ * @property {function} setKeyword - Function to update the search keyword
+ */
+
+/**
+ * Search input component with icon and focus states.
+ * Provides a styled text input with search icon and visual feedback on focus.
+ * Updates search keyword in real-time as user types.
+ *
+ * @component
+ * @param {SearchProps} props - Component props
+ * @returns {React.JSX.Element} Rendered search input with icon
+ *
+ * @example
+ * ```javascript
+ * // Basic search usage
+ * const [searchTerm, setSearchTerm] = useState("");
+ *
+ * <Search
+ *   keyword={searchTerm}
+ *   setKeyword={setSearchTerm}
+ * />
+ *
+ * // With product filtering
+ * const [keyword, setKeyword] = useState("");
+ * const filteredProducts = products.filter(product =>
+ *   product.title.toLowerCase().includes(keyword.toLowerCase())
+ * );
+ *
+ * <Search keyword={keyword} setKeyword={setKeyword} />
+ * ```
+ */
 const Search = ({ keyword, setKeyword }) => {
   const [isFocused, setIsFocused] = useState(false);
 

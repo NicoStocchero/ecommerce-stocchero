@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Login screen component for user authentication.
+ * Handles user login with email/password, form validation, and navigation to signup.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -28,21 +35,66 @@ import {
 } from "../../utils/validationHelpers";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrorMessage";
 
+/**
+ * Login screen component props
+ * @typedef {Object} LoginProps
+ * @property {Object} navigation - React Navigation object for screen navigation
+ * @property {function} navigation.navigate - Function to navigate to other screens
+ */
+
+/**
+ * Login screen component for user authentication.
+ * Provides a complete login form with email/password fields, validation, error handling,
+ * and navigation to signup. Includes forgot password functionality and auto-focus management.
+ *
+ * Features:
+ * - Real-time form validation with Zod schema
+ * - Password visibility toggle
+ * - Keyboard navigation between fields
+ * - Firebase authentication integration
+ * - Error handling and user feedback
+ * - Responsive design with keyboard avoidance
+ *
+ * @component
+ * @param {LoginProps} props - Component props
+ * @returns {React.JSX.Element} Rendered login screen
+ *
+ * @example
+ * ```javascript
+ * // Used in AuthStack navigator
+ * <Stack.Screen name="Login" component={Login} />
+ *
+ * // Navigation from SignUp screen
+ * navigation.navigate("Login");
+ * ```
+ */
 const Login = ({ navigation }) => {
+  // Form state management
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState(emptyErrors(formData));
   const [touched, setTouched] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
+  // Refs for keyboard navigation
   const passwordRef = useRef(null);
+
+  // Redux hooks
   const dispatch = useDispatch();
   const { error, isAuthenticated } = useSelector((state) => state.auth);
   const [login, { isLoading }] = useLoginMutation();
 
+  /**
+   * Effect to clear form when user is authenticated
+   */
   useEffect(() => {
     if (isAuthenticated) setFormData({ email: "", password: "" });
   }, [isAuthenticated]);
 
+  /**
+   * Updates form data and clears field errors when user types
+   * @param {string} field - Form field name to update
+   * @param {string} value - New field value
+   */
   const updateFormData = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field] && touched[field]) {
@@ -50,12 +102,21 @@ const Login = ({ navigation }) => {
     }
   };
 
+  /**
+   * Handles field blur event and validates individual field
+   * @param {string} field - Form field name that lost focus
+   */
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
     const errorMsg = validateField(loginSchema, formData, field);
     setErrors((prev) => ({ ...prev, [field]: errorMsg }));
   };
 
+  /**
+   * Validates entire form using Zod schema
+   * @param {Object} data - Form data to validate
+   * @returns {boolean} True if form is valid, false otherwise
+   */
   const validateForm = (data) => {
     const result = loginSchema.safeParse(data);
     if (!result.success) {
@@ -67,6 +128,10 @@ const Login = ({ navigation }) => {
     return true;
   };
 
+  /**
+   * Handles login form submission
+   * Validates form, calls login API, and dispatches appropriate actions
+   */
   const handleLogin = async () => {
     Keyboard.dismiss();
     if (!validateForm(formData)) return;
@@ -96,6 +161,10 @@ const Login = ({ navigation }) => {
     }
   };
 
+  /**
+   * Handles forgot password functionality
+   * Currently shows placeholder alert, to be implemented with Firebase auth
+   */
   const handleForgotPassword = () => {
     if (!formData.email) {
       Alert.alert(
@@ -110,6 +179,9 @@ const Login = ({ navigation }) => {
     );
   };
 
+  /**
+   * Navigates to SignUp screen
+   */
   const handleRegister = () => navigation.navigate("SignUp");
 
   return (

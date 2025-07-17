@@ -1,10 +1,55 @@
+/**
+ * @fileoverview Quantity counter component for product selection.
+ * Provides increment/decrement buttons with stock validation and user feedback.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import { StyleSheet, Text, View, Pressable, Alert } from "react-native";
 import React, { useState } from "react";
 import colors from "../global/colors";
 
+/**
+ * ButtonCount component props
+ * @typedef {Object} ButtonCountProps
+ * @property {function} [onQuantityChange] - Callback function called when quantity changes
+ * @property {number} [initial=1] - Initial quantity value
+ * @property {number} [stock=10] - Maximum available stock for validation
+ */
+
+/**
+ * Quantity counter component with increment/decrement buttons.
+ * Validates against available stock and provides user feedback for invalid operations.
+ * Maintains internal state and notifies parent component of quantity changes.
+ *
+ * @component
+ * @param {ButtonCountProps} props - Component props
+ * @returns {React.JSX.Element} Rendered quantity counter with buttons
+ *
+ * @example
+ * ```javascript
+ * // Basic usage
+ * <ButtonCount
+ *   onQuantityChange={(newQuantity) => setQuantity(newQuantity)}
+ *   initial={1}
+ *   stock={15}
+ * />
+ *
+ * // With product stock validation
+ * <ButtonCount
+ *   onQuantityChange={handleQuantityChange}
+ *   initial={1}
+ *   stock={product.stock}
+ * />
+ * ```
+ */
 const ButtonCount = ({ onQuantityChange, initial = 1, stock = 10 }) => {
   const [count, setCount] = useState(initial);
 
+  /**
+   * Handles increment button press.
+   * Validates against available stock before incrementing.
+   */
   const handleIncrement = () => {
     if (count + 1 > stock) {
       Alert.alert("Stock insuficiente", "No hay más stock disponible.");
@@ -15,6 +60,10 @@ const ButtonCount = ({ onQuantityChange, initial = 1, stock = 10 }) => {
     if (onQuantityChange) onQuantityChange(newCount);
   };
 
+  /**
+   * Handles decrement button press.
+   * Prevents quantity from going below 1.
+   */
   const handleDecrement = () => {
     if (count > 1) {
       const newCount = count - 1;

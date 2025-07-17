@@ -1,3 +1,10 @@
+/**
+ * @fileoverview SignUp screen component for user registration.
+ * Handles user registration with email/password confirmation, validation, and navigation to login.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -27,7 +34,43 @@ import {
 } from "../../components/Auth";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrorMessage";
 
+/**
+ * SignUp screen component props
+ * @typedef {Object} SignUpProps
+ * @property {Object} navigation - React Navigation object for screen navigation
+ * @property {function} navigation.navigate - Function to navigate to other screens
+ */
+
+/**
+ * SignUp screen component for user registration.
+ * Provides a complete registration form with email, password, and password confirmation fields.
+ * Includes comprehensive validation, error handling, and automatic navigation on success.
+ *
+ * Features:
+ * - Strict password validation with security requirements
+ * - Password confirmation matching validation
+ * - Password visibility toggles for both fields
+ * - Real-time form validation with Zod schema
+ * - Firebase authentication integration
+ * - Field-specific error display
+ * - Keyboard navigation between fields
+ * - Responsive design with keyboard avoidance
+ *
+ * @component
+ * @param {SignUpProps} props - Component props
+ * @returns {React.JSX.Element} Rendered signup screen
+ *
+ * @example
+ * ```javascript
+ * // Used in AuthStack navigator
+ * <Stack.Screen name="SignUp" component={SignUp} />
+ *
+ * // Navigation from Login screen
+ * navigation.navigate("SignUp");
+ * ```
+ */
 const SignUp = ({ navigation }) => {
+  // Form state management
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -38,18 +81,27 @@ const SignUp = ({ navigation }) => {
   const [errors, setErrors] = useState(emptyErrors(formData));
   const [touched, setTouched] = useState({});
 
-  // Refs para navegación con returnKey
+  // Refs for keyboard navigation
   const passwordRef = useRef(null);
   const confirmPasswordRef = useRef(null);
 
+  // Redux hooks
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const [signUp, { isLoading, error: apiError }] = useSignUpMutation();
 
+  /**
+   * Effect to navigate to shop when user is authenticated
+   */
   useEffect(() => {
     if (isAuthenticated) navigation.navigate("Shop");
   }, [isAuthenticated, navigation]);
 
+  /**
+   * Updates form data and clears field errors when user types
+   * @param {string} field - Form field name to update
+   * @param {string} value - New field value
+   */
   const updateFormData = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field] && touched[field]) {
@@ -57,12 +109,21 @@ const SignUp = ({ navigation }) => {
     }
   };
 
+  /**
+   * Handles field blur event and validates individual field
+   * @param {string} field - Form field name that lost focus
+   */
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
     const errorMsg = validateField(signUpSchema, formData, field);
     setErrors((prev) => ({ ...prev, [field]: errorMsg }));
   };
 
+  /**
+   * Validates entire form using Zod schema including password confirmation
+   * @param {Object} data - Form data to validate
+   * @returns {boolean} True if form is valid, false otherwise
+   */
   const validateForm = (data) => {
     const result = signUpSchema.safeParse(data);
     if (!result.success) {
@@ -78,6 +139,10 @@ const SignUp = ({ navigation }) => {
     return true;
   };
 
+  /**
+   * Handles signup form submission
+   * Validates form, calls signup API, and dispatches appropriate actions
+   */
   const handleSignUp = async () => {
     Keyboard.dismiss();
     if (!validateForm(formData)) return;
@@ -109,6 +174,9 @@ const SignUp = ({ navigation }) => {
     }
   };
 
+  /**
+   * Navigates to Login screen
+   */
   const navigateToLogin = () => navigation.navigate("Login");
 
   return (

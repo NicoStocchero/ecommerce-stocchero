@@ -1,4 +1,10 @@
-// src/screens/Shop/Categories.jsx
+/**
+ * @fileoverview Categories screen component for displaying and filtering product categories.
+ * Shows a searchable list of product categories with navigation to products.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import React from "react";
 import { Text, StyleSheet, View, FlatList, Pressable } from "react-native";
 import { Image } from "expo-image";
@@ -13,6 +19,12 @@ import {
 import { useGetCategoriesQuery } from "../../services/shop/shopApi";
 import Loading from "../../components/Loading";
 
+/**
+ * Empty state component for when no categories match search or no categories exist
+ * @param {Object} props - Component props
+ * @param {string} props.keyword - Current search keyword
+ * @returns {React.JSX.Element} Empty state message
+ */
 const EmptyComponent = ({ keyword }) => (
   <View style={styles.emptyContainer}>
     <Text style={styles.emptyText}>
@@ -23,32 +35,86 @@ const EmptyComponent = ({ keyword }) => (
   </View>
 );
 
+/**
+ * Categories screen component props
+ * @typedef {Object} CategoriesProps
+ * @property {Object} navigation - React Navigation object for screen navigation
+ * @property {function} navigation.navigate - Function to navigate to other screens
+ */
+
+/**
+ * Categories screen component for displaying and filtering product categories.
+ * Provides a searchable grid of product categories with images and titles.
+ * Handles category selection and navigation to products screen.
+ *
+ * Features:
+ * - Real-time search filtering of categories
+ * - RTK Query integration for data fetching
+ * - Loading states with custom loading component
+ * - Empty state handling for no results
+ * - Category selection with Redux state management
+ * - Navigation to products screen with category parameter
+ * - Responsive FlatList with optimized rendering
+ *
+ * @component
+ * @param {CategoriesProps} props - Component props
+ * @returns {React.JSX.Element} Rendered categories screen
+ *
+ * @example
+ * ```javascript
+ * // Used in ShopStack navigator
+ * <Stack.Screen
+ *   name="Categories"
+ *   component={Categories}
+ *   options={{ headerTitle: "Categorías" }}
+ * />
+ *
+ * // Navigation flow: Categories → Products
+ * ```
+ */
 const Categories = ({ navigation }) => {
+  // Redux hooks
   const dispatch = useDispatch();
   const { data: categories, isLoading: isLoadingCategories } =
     useGetCategoriesQuery();
   const keyword = useSelector((state) => state.shop.searchKeyword);
 
+  // Show loading state while fetching categories
   if (isLoadingCategories) {
     return <Loading text="Cargando categorías..." />;
   }
 
-  // Cuando el usuario escribe:
+  /**
+   * Handles search input changes and updates Redux state
+   * @param {string} text - New search keyword
+   */
   const handleSearch = (text) => {
     dispatch(setSearchKeyword(text));
   };
 
+  // Normalize search keyword for case-insensitive filtering
   const normalizedKeyword = keyword.trim().toLowerCase();
 
+  /**
+   * Handles category selection and navigation to products
+   * @param {string} categoryId - Selected category ID
+   */
   const handleCategoryPress = (categoryId) => {
     dispatch(setSelectedCategory(categoryId));
     navigation.navigate("Products", { categoryId });
   };
 
+  // Filter categories based on search keyword
   const filteredCategories = categories?.filter((category) =>
     category.title.toLowerCase().includes(normalizedKeyword)
   );
 
+  /**
+   * Renders individual category item in the FlatList
+   * @param {Object} param - FlatList render item parameter
+   * @param {Object} param.item - Category item data
+   * @returns {React.JSX.Element} Rendered category item
+   */
   const renderCategoryItem = ({ item }) => (
     <Pressable onPress={() => handleCategoryPress(item.id)}>
       <FlatCard>

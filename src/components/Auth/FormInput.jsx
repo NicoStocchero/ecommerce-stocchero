@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Reusable form input component with validation and accessibility support.
+ * Features include password visibility toggle, error states, and keyboard navigation.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import React, { useState, forwardRef } from "react";
 import {
   View,
@@ -9,6 +16,61 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import colors from "../../global/colors";
 
+/**
+ * FormInput component props
+ * @typedef {Object} FormInputProps
+ * @property {string} [label] - Label text displayed above the input
+ * @property {string} [icon] - Ionicons icon name for the left side of input
+ * @property {string} value - Current input value
+ * @property {function} onChangeText - Callback when text changes
+ * @property {function} [onBlur] - Callback when input loses focus
+ * @property {string} [placeholder] - Placeholder text
+ * @property {string} [error] - Error message to display
+ * @property {boolean} [touched] - Whether the field has been touched/focused
+ * @property {boolean} [secureTextEntry=false] - Whether to hide text (password field)
+ * @property {boolean} [showPassword] - Current password visibility state
+ * @property {function} [togglePasswordVisibility] - Callback to toggle password visibility
+ * @property {string} [keyboardType="default"] - Keyboard type for input
+ * @property {string} [autoCapitalize="none"] - Auto-capitalization behavior
+ * @property {string} [autoComplete="off"] - Auto-complete behavior
+ */
+
+/**
+ * Reusable form input component with validation, error handling, and accessibility.
+ * Supports password fields with visibility toggle and various input configurations.
+ *
+ * @component
+ * @param {FormInputProps} props - Component props
+ * @param {React.Ref} ref - Forwarded ref for focus management
+ * @returns {React.JSX.Element} Rendered form input component
+ *
+ * @example
+ * ```javascript
+ * <FormInput
+ *   label="Email"
+ *   icon="mail-outline"
+ *   value={email}
+ *   onChangeText={setEmail}
+ *   onBlur={() => validateEmail()}
+ *   placeholder="ejemplo@email.com"
+ *   error={emailError}
+ *   touched={emailTouched}
+ *   keyboardType="email-address"
+ *   autoCapitalize="none"
+ * />
+ *
+ * // Password field example
+ * <FormInput
+ *   label="Contraseña"
+ *   icon="lock-closed-outline"
+ *   value={password}
+ *   onChangeText={setPassword}
+ *   secureTextEntry
+ *   showPassword={showPassword}
+ *   togglePasswordVisibility={() => setShowPassword(!showPassword)}
+ * />
+ * ```
+ */
 const FormInput = forwardRef(
   (
     {
@@ -93,6 +155,9 @@ const FormInput = forwardRef(
     );
   }
 );
+
+// Set display name for debugging
+FormInput.displayName = "FormInput";
 
 const styles = StyleSheet.create({
   inputContainer: { marginBottom: 20 },

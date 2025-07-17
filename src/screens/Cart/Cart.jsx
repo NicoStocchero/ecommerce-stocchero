@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Cart screen component for displaying and managing shopping cart items.
+ * Shows cart items with quantities, prices, and provides cart management functionality.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import React from "react";
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { Image } from "expo-image";
@@ -6,6 +13,14 @@ import colors from "../../global/colors";
 import { clearCart, removeItemFromCart } from "../../features/cart/cartSlice";
 import FlatCard from "../../components/FlatCard";
 
+/**
+ * Cart summary component displaying totals and action buttons
+ * @param {Object} props - Component props
+ * @param {number} props.totalPrice - Total cart price
+ * @param {number} props.totalQuantity - Total number of items
+ * @param {function} props.onClearCart - Function to clear all cart items
+ * @returns {React.JSX.Element} Cart summary with totals and buttons
+ */
 const CartSummary = ({ totalPrice, totalQuantity, onClearCart }) => (
   <View style={styles.summaryContainer}>
     <FlatCard style={styles.summaryCard}>
@@ -31,18 +46,75 @@ const CartSummary = ({ totalPrice, totalQuantity, onClearCart }) => (
   </View>
 );
 
+/**
+ * Cart screen component props
+ * @typedef {Object} CartProps
+ * @property {Object} navigation - React Navigation object for screen navigation
+ * @property {function} navigation.navigate - Function to navigate to other screens
+ */
+
+/**
+ * Cart screen component for displaying and managing shopping cart items.
+ * Shows a list of cart items with images, quantities, prices, and subtotals.
+ * Provides functionality to remove items, clear cart, and navigate to checkout.
+ *
+ * Features:
+ * - Redux integration for cart state management
+ * - Individual item display with images and details
+ * - Quantity and subtotal calculations per item
+ * - Remove individual items functionality
+ * - Clear entire cart functionality
+ * - Cart summary with totals
+ * - Empty cart state handling
+ * - Navigation to product details from cart items
+ * - Checkout button (placeholder for future implementation)
+ * - Responsive FlatList with optimized rendering
+ *
+ * @component
+ * @param {CartProps} props - Component props
+ * @returns {React.JSX.Element} Rendered cart screen
+ *
+ * @example
+ * ```javascript
+ * // Used in CartStack navigator
+ * <Stack.Screen
+ *   name="Cart"
+ *   component={Cart}
+ *   options={{ headerTitle: "Carrito" }}
+ * />
+ *
+ * // Navigation from ProductDetail after adding item
+ * navigation.navigate("Carrito");
+ * ```
+ */
 const Cart = ({ navigation }) => {
+  // Redux hooks
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart);
 
+  /**
+   * Handles clearing all items from cart
+   * Dispatches clearCart action to Redux store
+   */
   const handleClearCart = () => {
     dispatch(clearCart());
   };
 
+  /**
+   * Handles removing individual item from cart
+   * @param {string} itemId - ID of item to remove from cart
+   */
   const handleRemoveItem = (itemId) => {
     dispatch(removeItemFromCart(itemId));
   };
 
+  /**
+   * Renders individual cart item in the FlatList
+   * Includes item image, details, quantity, and remove button
+   * @param {Object} param - FlatList render item parameter
+   * @param {Object} param.item - Cart item data
+   * @returns {React.JSX.Element} Rendered cart item
+   */
   const renderCartItem = ({ item }) => (
     <FlatCard style={styles.cartItem}>
       <Pressable
@@ -89,6 +161,9 @@ const Cart = ({ navigation }) => {
     </FlatCard>
   );
 
+  /**
+   * Footer component for cart summary
+   */
   const footerComponent = (
     <CartSummary
       totalPrice={cart.totalPrice}

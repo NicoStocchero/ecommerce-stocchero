@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Authentication button component with loading states and accessibility.
+ * Provides consistent styling for login, signup, and other authentication actions.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import React from "react";
 import {
   TouchableOpacity,
@@ -7,6 +14,40 @@ import {
 } from "react-native";
 import colors from "../../global/colors";
 
+/**
+ * AuthButton component props
+ * @typedef {Object} AuthButtonProps
+ * @property {string} title - Button text to display
+ * @property {function} onPress - Callback function when button is pressed
+ * @property {boolean} [loading=false] - Whether to show loading spinner
+ * @property {boolean} [disabled=false] - Whether the button is disabled
+ */
+
+/**
+ * Reusable authentication button component with loading states and consistent styling.
+ * Automatically handles disabled state during loading and provides accessibility support.
+ *
+ * @component
+ * @param {AuthButtonProps} props - Component props
+ * @returns {React.JSX.Element} Rendered authentication button
+ *
+ * @example
+ * ```javascript
+ * // Basic button
+ * <AuthButton
+ *   title="Iniciar Sesión"
+ *   onPress={handleLogin}
+ * />
+ *
+ * // Loading button
+ * <AuthButton
+ *   title="Registrarse"
+ *   onPress={handleSignUp}
+ *   loading={isLoading}
+ *   disabled={isLoading}
+ * />
+ * ```
+ */
 const AuthButton = ({ title, onPress, loading, disabled }) => (
   <TouchableOpacity
     style={[styles.button, (loading || disabled) && styles.buttonDisabled]}

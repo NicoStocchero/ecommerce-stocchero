@@ -1,4 +1,10 @@
-// src/screens/Shop/ProductDetail.jsx
+/**
+ * @fileoverview ProductDetail screen component for displaying individual product information.
+ * Shows detailed product view with add to cart functionality and quantity selection.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import {
   View,
   Text,
@@ -17,20 +23,68 @@ import { safeAddItemToCart } from "../../features/cart/cartThunks";
 import { useGetProductByIdQuery } from "../../services/shop/shopApi";
 import Loading from "../../components/Loading";
 
+/**
+ * ProductDetail screen component props
+ * @typedef {Object} ProductDetailProps
+ * @property {Object} navigation - React Navigation object for screen navigation
+ * @property {function} navigation.navigate - Function to navigate to other screens
+ * @property {Object} route - React Navigation route object with parameters
+ * @property {Object} route.params - Route parameters
+ * @property {string} route.params.productId - Selected product ID
+ */
+
+/**
+ * ProductDetail screen component for displaying individual product information.
+ * Shows comprehensive product details including images, description, price, stock status,
+ * and quantity selection with add to cart functionality.
+ *
+ * Features:
+ * - RTK Query integration for individual product fetching
+ * - Large product image display with optimized loading
+ * - Detailed product information (title, price, description, stock)
+ * - Quantity selection with stock validation
+ * - Add to cart functionality with stock checking
+ * - Loading states and error handling
+ * - Navigation options after adding to cart
+ * - Stock validation with user feedback alerts
+ * - Redux integration for cart management
+ *
+ * @component
+ * @param {ProductDetailProps} props - Component props
+ * @returns {React.JSX.Element} Rendered product detail screen
+ *
+ * @example
+ * ```javascript
+ * // Used in ShopStack navigator
+ * <Stack.Screen
+ *   name="ProductDetail"
+ *   component={ProductDetail}
+ *   options={{ headerTitle: "" }}
+ * />
+ *
+ * // Navigation from Products screen
+ * navigation.navigate("ProductDetail", { productId: "123" });
+ * ```
+ */
 const ProductDetail = ({ navigation }) => {
+  // Get product ID from navigation route
   const route = useRoute();
   const dispatch = useDispatch();
   const { productId } = route.params;
 
+  // Local quantity state
   const [quantity, setQuantity] = useState(1);
 
+  // Fetch individual product data
   const { data: product, isLoading: isLoadingProduct } =
     useGetProductByIdQuery(productId);
 
+  // Show loading state while fetching product
   if (isLoadingProduct) {
     return <Loading text={`Cargando producto ${productId}...`} />;
   }
 
+  // Handle product not found
   if (!product) {
     return (
       <View style={styles.errorContainer}>
@@ -39,10 +93,20 @@ const ProductDetail = ({ navigation }) => {
     );
   }
 
+  /**
+   * Handles quantity changes from ButtonCount component
+   * @param {number} newCount - New quantity value
+   */
   const handleQuantityChange = (newCount) => {
     setQuantity(newCount);
   };
 
+  /**
+   * Validates if the selected quantity is valid against available stock
+   * @param {number} q - Quantity to validate
+   * @param {number} stock - Available stock
+   * @returns {boolean} True if quantity is valid, false otherwise
+   */
   const isQuantityValid = (q, stock) => {
     if (q <= 0) {
       Alert.alert("Cantidad inválida", "Debés agregar al menos 1 unidad.");
@@ -57,6 +121,10 @@ const ProductDetail = ({ navigation }) => {
     return true;
   };
 
+  /**
+   * Handles adding product to cart with quantity validation
+   * Shows success/error alerts and navigation options
+   */
   const handleAddToCart = async () => {
     if (!isQuantityValid(quantity, product.stock)) return;
 

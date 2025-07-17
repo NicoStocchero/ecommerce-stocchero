@@ -1,9 +1,40 @@
-// navigation/ShopNavigator.jsx
+/**
+ * @fileoverview Shop stack navigator for categories, products, and product detail screens.
+ * Manages the shopping flow navigation from categories to individual product details.
+ * @author Stocchero
+ * @version 1.0.0
+ */
+
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Categories, Products, ProductDetail } from "../../screens/Shop";
 
 const Stack = createNativeStackNavigator();
 
+/**
+ * Shop stack navigator component.
+ * Provides navigation flow through the shopping experience: Categories → Products → ProductDetail.
+ * Each screen has appropriate headers with Spanish titles for user clarity.
+ *
+ * @component
+ * @returns {React.JSX.Element} Rendered shop stack navigator
+ *
+ * @example
+ * ```javascript
+ * // Used in TabNavigator as the "Tienda" tab
+ * import { ShopStack } from './stack';
+ *
+ * <Tab.Screen
+ *   name="Tienda"
+ *   component={ShopStack}
+ *   options={{
+ *     tabBarIcon: ({ focused }) => <ShopTabIcon focused={focused} />
+ *   }}
+ * />
+ *
+ * // Navigation flow:
+ * // Categories → Products (with categoryId param) → ProductDetail (with productId param)
+ * ```
+ */
 const ShopStack = () => {
   return (
     <Stack.Navigator initialRouteName="Categories">
