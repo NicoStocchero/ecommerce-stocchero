@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { colors } from "../../global/colors";
-import { authService } from "../../services/authService";
+import { authService } from "../../services/auth/authService";
 import {
   loginStart,
   loginSuccess,

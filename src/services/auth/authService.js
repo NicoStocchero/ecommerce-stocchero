@@ -2,53 +2,10 @@ const AUTH_BASE_URL = process.env.EXPO_PUBLIC_AUTH_BASE_URL;
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 
 export const authService = {
-  // Registrar nuevo usuario
-  async signUp(email, password) {
-    try {
-      const response = await fetch(
-        `${AUTH_BASE_URL}/accounts:signUp?key=${API_KEY}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            returnSecureToken: true,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || "Error al registrar usuario");
-      }
-
-      return {
-        success: true,
-        user: {
-          uid: data.localId,
-          email: data.email,
-          token: data.idToken,
-          refreshToken: data.refreshToken,
-          expiresIn: data.expiresIn,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  },
-
-  // Iniciar sesión
   async signIn(email, password) {
     try {
       const response = await fetch(
-        `${AUTH_BASE_URL}/accounts:signInWithPassword?key=${API_KEY}`,
+        `${AUTH_BASE_URL}accounts:signInWithPassword?key=${API_KEY}`,
         {
           method: "POST",
           headers: {
@@ -65,32 +22,100 @@ export const authService = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || "Error al iniciar sesión");
+        let errorMessage = "Error en el login";
+        if (data.error) {
+          switch (data.error.message) {
+            case "EMAIL_NOT_FOUND":
+              errorMessage = "Email no encontrado";
+              break;
+            case "INVALID_PASSWORD":
+              errorMessage = "Contraseña incorrecta";
+              break;
+            case "USER_DISABLED":
+              errorMessage = "Usuario deshabilitado";
+              break;
+            case "INVALID_LOGIN_CREDENTIALS":
+              errorMessage = "Credenciales inválidas";
+              break;
+            default:
+              errorMessage = data.error.message;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       return {
-        success: true,
         user: {
-          uid: data.localId,
           email: data.email,
-          token: data.idToken,
-          refreshToken: data.refreshToken,
-          expiresIn: data.expiresIn,
+          localId: data.localId,
         },
+        token: data.idToken,
+        refreshToken: data.refreshToken,
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      throw new Error(error.message);
     }
   },
 
-  // Recuperar contraseña
+  async signUp(email, password) {
+    try {
+      const response = await fetch(
+        `${AUTH_BASE_URL}accounts:signUp?key=${API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        let errorMessage = "Error en el registro";
+        if (data.error) {
+          switch (data.error.message) {
+            case "EMAIL_EXISTS":
+              errorMessage = "El email ya está registrado";
+              break;
+            case "OPERATION_NOT_ALLOWED":
+              errorMessage = "Operación no permitida";
+              break;
+            case "TOO_MANY_ATTEMPTS_TRY_LATER":
+              errorMessage = "Demasiados intentos, intenta más tarde";
+              break;
+            case "WEAK_PASSWORD":
+              errorMessage = "La contraseña es muy débil";
+              break;
+            default:
+              errorMessage = data.error.message;
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      return {
+        user: {
+          email: data.email,
+          localId: data.localId,
+        },
+        token: data.idToken,
+        refreshToken: data.refreshToken,
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+
   async resetPassword(email) {
     try {
       const response = await fetch(
-        `${AUTH_BASE_URL}/accounts:sendOobCode?key=${API_KEY}`,
+        `${AUTH_BASE_URL}accounts:sendOobCode?key=${API_KEY}`,
         {
           method: "POST",
           headers: {
@@ -106,24 +131,28 @@ export const authService = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error?.message || "Error al enviar email de recuperación"
-        );
+        let errorMessage = "Error al enviar el email";
+        if (data.error) {
+          switch (data.error.message) {
+            case "EMAIL_NOT_FOUND":
+              errorMessage = "Email no encontrado";
+              break;
+            case "INVALID_EMAIL":
+              errorMessage = "Email inválido";
+              break;
+            default:
+              errorMessage = data.error.message;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
-      return {
-        success: true,
-        message: "Email de recuperación enviado",
-      };
+      return data;
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      throw new Error(error.message);
     }
   },
 
-  // Refrescar token
   async refreshToken(refreshToken) {
     try {
       const response = await fetch(
@@ -147,16 +176,11 @@ export const authService = {
       }
 
       return {
-        success: true,
-        token: data.access_token,
+        token: data.id_token,
         refreshToken: data.refresh_token,
-        expiresIn: data.expires_in,
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      throw new Error(error.message);
     }
   },
 };
