@@ -1,85 +1,115 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
-  Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
-  Alert,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Text,
+  Keyboard,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { signUp } from "../../features/auth/authSlice";
+import { useSignUpMutation } from "../../services/auth/authApi";
+import { authSuccess, authFailure } from "../../features/auth/authSlice";
 import colors from "../../global/colors";
+import { signUpSchema } from "../../schemas/authSchema";
+import {
+  mapZodErrors,
+  validateField,
+  emptyErrors,
+} from "../../utils/validationHelpers";
+import {
+  FormInput,
+  ErrorMessage,
+  AuthDivider,
+  AuthButton,
+} from "../../components/Auth";
+import { getFirebaseErrorMessage } from "../../utils/firebaseErrorMessage";
 
 const SignUp = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({});
+  const [errors, setErrors] = useState(emptyErrors(formData));
+  const [touched, setTouched] = useState({});
+
+  // Refs para navegación con returnKey
+  const passwordRef = useRef(null);
+  const confirmPasswordRef = useRef(null);
 
   const dispatch = useDispatch();
-  const { isLoading, error, isAuthenticated } = useSelector(
-    (state) => state.auth
-  );
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const [signUp, { isLoading, error: apiError }] = useSignUpMutation();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigation.navigate("Shop");
-    }
+    if (isAuthenticated) navigation.navigate("Shop");
   }, [isAuthenticated, navigation]);
 
-  useEffect(() => {
-    if (error) {
-      Alert.alert("Error de registro", error);
-    }
-  }, [error]);
-
-  const validateForm = () => {
-    const errors = {};
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) {
-      errors.email = "El email es requerido";
-    } else if (!emailRegex.test(email)) {
-      errors.email = "Ingresa un email válido";
-    }
-
-    // Password validation
-    if (!password) {
-      errors.password = "La contraseña es requerida";
-    } else if (password.length < 6) {
-      errors.password = "La contraseña debe tener al menos 6 caracteres";
-    }
-
-    // Confirm password validation
-    if (!confirmPassword) {
-      errors.confirmPassword = "Confirma tu contraseña";
-    } else if (password !== confirmPassword) {
-      errors.confirmPassword = "Las contraseñas no coinciden";
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSignUp = () => {
-    if (validateForm()) {
-      dispatch(signUp({ email, password }));
+  const updateFormData = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field] && touched[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
-  const navigateToLogin = () => {
-    navigation.navigate("Login");
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const errorMsg = validateField(signUpSchema, formData, field);
+    setErrors((prev) => ({ ...prev, [field]: errorMsg }));
   };
+
+  const validateForm = (data) => {
+    const result = signUpSchema.safeParse(data);
+    if (!result.success) {
+      setErrors(mapZodErrors(result));
+      setTouched({
+        email: true,
+        password: true,
+        confirmPassword: true,
+      });
+      return false;
+    }
+    setErrors(emptyErrors(data));
+    return true;
+  };
+
+  const handleSignUp = async () => {
+    Keyboard.dismiss();
+    if (!validateForm(formData)) return;
+
+    const result = await signUp({
+      email: formData.email,
+      password: formData.password,
+      returnSecureToken: true,
+    });
+
+    if (result.data) {
+      dispatch(
+        authSuccess({
+          user: {
+            email: result.data.email,
+            localId: result.data.localId,
+          },
+          token: result.data.idToken,
+          refreshToken: result.data.refreshToken,
+        })
+      );
+    } else if (result.error) {
+      const errorMessage = getFirebaseErrorMessage(result.error, "signup");
+      dispatch(authFailure(errorMessage));
+      if (result.error.data?.error?.message === "EMAIL_EXISTS") {
+        setErrors((prev) => ({ ...prev, email: errorMessage }));
+        setTouched((prev) => ({ ...prev, email: true }));
+      }
+    }
+  };
+
+  const navigateToLogin = () => navigation.navigate("Login");
 
   return (
     <SafeAreaView style={styles.container}>
@@ -93,147 +123,84 @@ const SignUp = ({ navigation }) => {
         >
           <View style={styles.header}>
             <Text style={styles.title}>Crear Cuenta</Text>
-            <Text style={styles.subtitle}>
-              Completa los datos para registrarte
+            <Text style={styles.microcopy}>
+              Registrate para empezar a comprar en Tienda Renace
             </Text>
           </View>
 
+          <ErrorMessage
+            message={apiError && getFirebaseErrorMessage(apiError)}
+          />
+
           <View style={styles.form}>
-            {/* Email Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
-              <View
-                style={[
-                  styles.inputWrapper,
-                  validationErrors.email && styles.inputError,
-                ]}
-              >
-                <Ionicons
-                  name="mail-outline"
-                  size={20}
-                  color={colors.gray}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ingresa tu email"
-                  placeholderTextColor={colors.gray}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                />
-              </View>
-              {validationErrors.email && (
-                <Text style={styles.errorText}>{validationErrors.email}</Text>
-              )}
-            </View>
+            <FormInput
+              label="Email"
+              icon="mail-outline"
+              value={formData.email}
+              onChangeText={(value) => updateFormData("email", value)}
+              onBlur={() => handleBlur("email")}
+              placeholder="Ingresa tu email"
+              error={errors.email}
+              touched={touched.email}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              autoFocus={true}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
+            />
+            <FormInput
+              label="Contraseña"
+              icon="lock-closed-outline"
+              value={formData.password}
+              onChangeText={(value) => updateFormData("password", value)}
+              onBlur={() => handleBlur("password")}
+              placeholder="Ingresa tu contraseña"
+              error={errors.password}
+              touched={touched.password}
+              secureTextEntry
+              showPassword={showPassword}
+              togglePasswordVisibility={() => setShowPassword(!showPassword)}
+              autoCapitalize="none"
+              autoComplete="new-password"
+              ref={passwordRef}
+              returnKeyType="next"
+              onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+            />
+            <FormInput
+              label="Confirmar Contraseña"
+              icon="lock-closed-outline"
+              value={formData.confirmPassword}
+              onChangeText={(value) => updateFormData("confirmPassword", value)}
+              onBlur={() => handleBlur("confirmPassword")}
+              placeholder="Confirma tu contraseña"
+              error={errors.confirmPassword}
+              touched={touched.confirmPassword}
+              secureTextEntry
+              showPassword={showConfirmPassword}
+              togglePasswordVisibility={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
+              autoCapitalize="none"
+              autoComplete="new-password"
+              ref={confirmPasswordRef}
+              onSubmitEditing={handleSignUp}
+              returnKeyType="done"
+            />
 
-            {/* Password Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Contraseña</Text>
-              <View
-                style={[
-                  styles.inputWrapper,
-                  validationErrors.password && styles.inputError,
-                ]}
-              >
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color={colors.gray}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ingresa tu contraseña"
-                  placeholderTextColor={colors.gray}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  autoComplete="new-password"
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  style={styles.eyeIcon}
-                >
-                  <Ionicons
-                    name={showPassword ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color={colors.gray}
-                  />
-                </TouchableOpacity>
-              </View>
-              {validationErrors.password && (
-                <Text style={styles.errorText}>
-                  {validationErrors.password}
-                </Text>
-              )}
-            </View>
-
-            {/* Confirm Password Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirmar Contraseña</Text>
-              <View
-                style={[
-                  styles.inputWrapper,
-                  validationErrors.confirmPassword && styles.inputError,
-                ]}
-              >
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color={colors.gray}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Confirma tu contraseña"
-                  placeholderTextColor={colors.gray}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry={!showConfirmPassword}
-                  autoComplete="new-password"
-                />
-                <TouchableOpacity
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={styles.eyeIcon}
-                >
-                  <Ionicons
-                    name={
-                      showConfirmPassword ? "eye-outline" : "eye-off-outline"
-                    }
-                    size={20}
-                    color={colors.gray}
-                  />
-                </TouchableOpacity>
-              </View>
-              {validationErrors.confirmPassword && (
-                <Text style={styles.errorText}>
-                  {validationErrors.confirmPassword}
-                </Text>
-              )}
-            </View>
-
-            {/* Sign Up Button */}
-            <TouchableOpacity
-              style={[styles.signUpButton, isLoading && styles.disabledButton]}
+            <AuthButton
+              title="Crear Cuenta"
               onPress={handleSignUp}
+              loading={isLoading}
               disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color={colors.white} size="small" />
-              ) : (
-                <Text style={styles.signUpButtonText}>Crear Cuenta</Text>
-              )}
-            </TouchableOpacity>
+            />
           </View>
 
-          {/* Login Link */}
+          <AuthDivider />
+
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              ¿Ya tienes cuenta?{" "}
+              ¿Ya tenés cuenta?{" "}
               <Text style={styles.linkText} onPress={navigateToLogin}>
                 Inicia sesión
               </Text>
@@ -244,6 +211,8 @@ const SignUp = ({ navigation }) => {
     </SafeAreaView>
   );
 };
+
+export default SignUp;
 
 const styles = StyleSheet.create({
   container: {
@@ -261,81 +230,29 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginBottom: 48,
+    marginBottom: 32,
   },
   title: {
     fontSize: 32,
     fontFamily: "Inter_28pt-Bold",
     color: colors.black,
-    marginBottom: 8,
+    marginBottom: 2,
   },
-  subtitle: {
-    fontSize: 16,
+  microcopy: {
+    fontSize: 15,
     fontFamily: "Inter_18pt-Regular",
     color: colors.gray,
     textAlign: "center",
+    marginBottom: 16,
+    marginTop: -6,
   },
   form: {
     marginBottom: 32,
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontFamily: "Inter_18pt-Medium",
-    color: colors.black,
-    marginBottom: 8,
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.lightGray,
-    borderRadius: 12,
-    backgroundColor: colors.lightGray,
-    paddingHorizontal: 16,
-    height: 56,
-  },
-  inputError: {
-    borderColor: colors.red,
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    fontFamily: "Inter_18pt-Regular",
-    color: colors.black,
-  },
-  eyeIcon: {
-    padding: 4,
-  },
-  errorText: {
-    fontSize: 12,
-    fontFamily: "Inter_18pt-Regular",
-    color: colors.red,
-    marginTop: 4,
-  },
-  signUpButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    height: 56,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 8,
-  },
-  disabledButton: {
-    backgroundColor: colors.gray,
-  },
-  signUpButtonText: {
-    fontSize: 16,
-    fontFamily: "Inter_18pt-SemiBold",
-    color: colors.white,
+    gap: 20,
   },
   footer: {
     alignItems: "center",
+    marginTop: 8,
   },
   footerText: {
     fontSize: 14,
@@ -347,5 +264,3 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_18pt-SemiBold",
   },
 });
-
-export default SignUp;

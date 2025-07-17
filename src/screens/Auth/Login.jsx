@@ -1,201 +1,198 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
-  Text,
-  TextInput,
   StyleSheet,
-  Pressable,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableOpacity,
+  Text,
+  Alert,
+  Keyboard,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { colors } from "../../global/colors";
-import { authService } from "../../services/auth/authService";
+import { SafeAreaView } from "react-native-safe-area-context";
+import colors from "../../global/colors";
+import { useLoginMutation } from "../../services/auth/authApi";
 import {
-  loginStart,
-  loginSuccess,
-  loginFailure,
+  authSuccess,
+  authFailure,
   clearError,
 } from "../../features/auth/authSlice";
+import { FormInput, ErrorMessage, AuthButton } from "../../components/Auth";
+import { loginSchema } from "../../schemas/authSchema";
+import {
+  mapZodErrors,
+  validateField,
+  emptyErrors,
+} from "../../utils/validationHelpers";
+import { getFirebaseErrorMessage } from "../../utils/firebaseErrorMessage";
 
 const Login = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState(emptyErrors(formData));
+  const [touched, setTouched] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
+  const passwordRef = useRef(null);
   const dispatch = useDispatch();
-  const { isLoading, error, isAuthenticated } = useSelector(
-    (state) => state.auth
-  );
+  const { error, isAuthenticated } = useSelector((state) => state.auth);
+  const [login, { isLoading }] = useLoginMutation();
 
-  // Navegar si ya está autenticado
   useEffect(() => {
-    if (isAuthenticated) {
-      // Resetear formulario
-      setEmail("");
-      setPassword("");
-      // Aquí puedes navegar a tu pantalla principal
-      // navigation.replace("Main"); // o el nombre de tu stack principal
-    }
+    if (isAuthenticated) setFormData({ email: "", password: "" });
   }, [isAuthenticated]);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Por favor completa todos los campos");
-      return;
-    }
-
-    if (!email.includes("@")) {
-      Alert.alert("Error", "Por favor ingresa un email válido");
-      return;
-    }
-
-    // Limpiar errores previos
-    dispatch(clearError());
-
-    // Iniciar proceso de login
-    dispatch(loginStart());
-
-    try {
-      const result = await authService.signIn(email, password);
-
-      if (result.success) {
-        // Login exitoso
-        dispatch(
-          loginSuccess({
-            user: result.user,
-            token: result.user.token,
-            refreshToken: result.user.refreshToken,
-          })
-        );
-
-        Alert.alert("Éxito", "Sesión iniciada correctamente");
-      } else {
-        // Login fallido
-        dispatch(loginFailure(result.error));
-        Alert.alert("Error", result.error || "No se pudo iniciar sesión");
-      }
-    } catch (loginError) {
-      dispatch(loginFailure("Error de conexión"));
-      Alert.alert("Error", "Error de conexión. Inténtalo de nuevo.");
+  const updateFormData = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field] && touched[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!email) {
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const errorMsg = validateField(loginSchema, formData, field);
+    setErrors((prev) => ({ ...prev, [field]: errorMsg }));
+  };
+
+  const validateForm = (data) => {
+    const result = loginSchema.safeParse(data);
+    if (!result.success) {
+      setErrors(mapZodErrors(result));
+      setTouched({ email: true, password: true });
+      return false;
+    }
+    setErrors(emptyErrors(data));
+    return true;
+  };
+
+  const handleLogin = async () => {
+    Keyboard.dismiss();
+    if (!validateForm(formData)) return;
+
+    dispatch(clearError());
+    const result = await login({
+      email: formData.email,
+      password: formData.password,
+      returnSecureToken: true,
+    });
+
+    if (result.data) {
+      dispatch(
+        authSuccess({
+          user: {
+            email: result.data.email,
+            localId: result.data.localId,
+          },
+          token: result.data.idToken,
+          refreshToken: result.data.refreshToken,
+        })
+      );
+    } else if (result.error) {
+      const errorMessage = getFirebaseErrorMessage(result.error, "login");
+      dispatch(authFailure(errorMessage));
+      Alert.alert("Error", errorMessage);
+    }
+  };
+
+  const handleForgotPassword = () => {
+    if (!formData.email) {
       Alert.alert(
         "Email requerido",
         "Por favor ingresa tu email para recuperar la contraseña"
       );
       return;
     }
-
-    try {
-      const result = await authService.resetPassword(email);
-
-      if (result.success) {
-        Alert.alert(
-          "Email enviado",
-          "Se ha enviado un enlace de recuperación a tu email"
-        );
-      } else {
-        Alert.alert("Error", result.error || "No se pudo enviar el email");
-      }
-    } catch (resetError) {
-      Alert.alert("Error", "Error al enviar email de recuperación");
-    }
+    Alert.alert(
+      "Función pendiente",
+      "La recuperación de contraseña se implementará próximamente"
+    );
   };
 
-  const handleRegister = () => {
-    // Navegar a pantalla de registro
-    navigation.navigate("Register");
-  };
+  const handleRegister = () => navigation.navigate("SignUp");
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>Iniciar Sesión</Text>
-          <Text style={styles.subtitle}>
-            Bienvenido de vuelta a tu tienda favorita
-          </Text>
-        </View>
-
-        {error && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{error}</Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>Iniciar Sesión</Text>
+            <Text style={styles.microcopy}>
+              ¡Bienvenido de nuevo a Tienda Renace!
+            </Text>
           </View>
-        )}
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
+          <ErrorMessage message={error} />
+
+          <View style={styles.form}>
+            <FormInput
+              label="Email"
+              icon="mail-outline"
+              value={formData.email}
+              onChangeText={(value) => updateFormData("email", value)}
+              onBlur={() => handleBlur("email")}
               placeholder="ejemplo@email.com"
-              placeholderTextColor={colors.gray}
-              value={email}
-              onChangeText={setEmail}
+              error={errors.email}
+              touched={touched.email}
               keyboardType="email-address"
               autoCapitalize="none"
-              autoCorrect={false}
-              editable={!isLoading}
+              autoComplete="email"
+              autoFocus={true}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
             />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Contraseña</Text>
-            <TextInput
-              style={styles.input}
+            <FormInput
+              label="Contraseña"
+              icon="lock-closed-outline"
+              value={formData.password}
+              onChangeText={(value) => updateFormData("password", value)}
+              onBlur={() => handleBlur("password")}
               placeholder="Tu contraseña"
-              placeholderTextColor={colors.gray}
-              value={password}
-              onChangeText={setPassword}
+              error={errors.password}
+              touched={touched.password}
               secureTextEntry
+              showPassword={showPassword}
+              togglePasswordVisibility={() => setShowPassword(!showPassword)}
               autoCapitalize="none"
-              autoCorrect={false}
-              editable={!isLoading}
+              autoComplete="password"
+              ref={passwordRef}
+              onSubmitEditing={handleLogin}
+              returnKeyType="done"
             />
+
+            <TouchableOpacity
+              onPress={handleForgotPassword}
+              style={styles.forgotButton}
+            >
+              <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+            </TouchableOpacity>
+
+            <AuthButton
+              title="Iniciar Sesión"
+              onPress={handleLogin}
+              loading={isLoading}
+              disabled={isLoading}
+            />
+
+            <TouchableOpacity
+              style={styles.registerButton}
+              onPress={handleRegister}
+            >
+              <Text style={styles.registerButtonText}>
+                ¿No tenés cuenta? Registrate
+              </Text>
+            </TouchableOpacity>
           </View>
-
-          <Pressable onPress={handleForgotPassword} style={styles.forgotButton}>
-            <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.loginButton,
-              isLoading && styles.loginButtonDisabled,
-            ]}
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            <Text style={styles.loginButtonText}>
-              {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
-            </Text>
-          </Pressable>
-
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>o</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <Pressable style={styles.registerButton} onPress={handleRegister}>
-            <Text style={styles.registerButtonText}>
-              ¿No tienes cuenta? Regístrate
-            </Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -206,116 +203,52 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
   },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
   },
   header: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 32,
   },
   title: {
-    fontFamily: "Inter-Bold",
-    fontSize: 28,
-    color: colors.gray900,
-    marginBottom: 8,
+    fontFamily: "Inter_28pt-Bold",
+    fontSize: 32,
+    color: colors.black,
+    marginBottom: 2,
   },
-  subtitle: {
-    fontFamily: "Inter-Regular",
-    fontSize: 16,
+  microcopy: {
+    fontSize: 15,
+    fontFamily: "Inter_18pt-Regular",
     color: colors.gray,
     textAlign: "center",
-    lineHeight: 22,
-  },
-  errorContainer: {
-    backgroundColor: colors.error,
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  errorText: {
-    fontFamily: "Inter-Medium",
-    fontSize: 14,
-    color: colors.white,
-    textAlign: "center",
+    marginBottom: 16,
+    marginTop: -6,
   },
   form: {
+    marginBottom: 32,
     gap: 20,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    fontFamily: "Inter-SemiBold",
-    fontSize: 14,
-    color: colors.gray900,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.gray300,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    fontFamily: "Inter-Regular",
-    color: colors.gray900,
-    backgroundColor: colors.white,
   },
   forgotButton: {
     alignSelf: "flex-end",
     marginTop: -8,
   },
   forgotText: {
-    fontFamily: "Inter-Medium",
+    fontFamily: "Inter_18pt-Medium",
     fontSize: 14,
     color: colors.primary,
-  },
-  loginButton: {
-    backgroundColor: colors.black,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 8,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  loginButtonDisabled: {
-    backgroundColor: colors.gray,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  loginButtonText: {
-    fontFamily: "Inter-Bold",
-    fontSize: 16,
-    color: colors.white,
-    textTransform: "uppercase",
-  },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 16,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.gray300,
-  },
-  dividerText: {
-    fontFamily: "Inter-Regular",
-    fontSize: 14,
-    color: colors.gray,
-    marginHorizontal: 16,
   },
   registerButton: {
     paddingVertical: 16,
     alignItems: "center",
   },
   registerButtonText: {
-    fontFamily: "Inter-SemiBold",
+    fontFamily: "Inter_18pt-SemiBold",
     fontSize: 16,
     color: colors.primary,
   },
