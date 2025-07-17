@@ -1,0 +1,5 @@
+# Firebase Auth (público pero sensible)
+EXPO_PUBLIC_API_KEY=AIzaSyA...TuClave
+
+# Firebase Realtime Database
+EXPO_PUBLIC_BASE_RTDB_URL=https://your-project-default-rtdb.firebaseio.com
