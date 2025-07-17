@@ -14,34 +14,69 @@ import { useState } from "react";
 import { colors } from "../../global/colors";
 import ButtonCount from "../../components/ButtonCount";
 import { safeAddItemToCart } from "../../features/cart/cartThunks";
+import { useGetProductByIdQuery } from "../../services/shop/shopApi";
+import Loading from "../../components/Loading";
 
 const ProductDetail = ({ navigation }) => {
   const route = useRoute();
-  const { product } = route.params;
   const dispatch = useDispatch();
+  const { productId } = route.params;
 
   const [quantity, setQuantity] = useState(1);
+
+  const { data: product, isLoading: isLoadingProduct } =
+    useGetProductByIdQuery(productId);
+
+  if (isLoadingProduct) {
+    return <Loading text={`Cargando producto ${productId}...`} />;
+  }
+
+  if (!product) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Producto no encontrado.</Text>
+      </View>
+    );
+  }
 
   const handleQuantityChange = (newCount) => {
     setQuantity(newCount);
   };
 
-  const handleAddToCart = () => {
-    if (quantity > product.stock) {
+  const isQuantityValid = (q, stock) => {
+    if (q <= 0) {
+      Alert.alert("Cantidad inválida", "Debés agregar al menos 1 unidad.");
+      return false;
+    }
+
+    if (q > stock) {
       Alert.alert("Stock insuficiente", "No hay suficiente stock disponible.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleAddToCart = async () => {
+    if (!isQuantityValid(quantity, product.stock)) return;
+
+    const itemToAdd = { ...product, quantity };
+    const result = await dispatch(safeAddItemToCart(itemToAdd));
+    if (!result) {
+      Alert.alert("Error", "No se pudo agregar al carrito.");
       return;
     }
 
-    const itemToAdd = {
-      ...product,
-      quantity,
-    };
-    const success = dispatch(safeAddItemToCart(itemToAdd));
-    if (!success) {
-      Alert.alert("Stock insuficiente", "No hay suficiente stock disponible.");
-      return;
-    }
-    navigation.navigate("Carrito");
+    Alert.alert("Éxito", "Producto agregado al carrito", [
+      {
+        text: "Ir al carrito",
+        onPress: () => navigation.navigate("Carrito"),
+      },
+      {
+        text: "Seguir comprando",
+        style: "cancel",
+      },
+    ]);
   };
 
   return (

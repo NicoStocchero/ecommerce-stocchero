@@ -51,7 +51,11 @@ const Products = ({ navigation }) => {
 
     return (
       <Pressable
-        onPress={() => navigation.navigate("ProductDetail", { product: item })}
+        onPress={() => {
+          return navigation.navigate("ProductDetail", {
+            productId: item.id,
+          });
+        }}
         style={outOfStock ? styles.outOfStockItem : null}
       >
         <FlatCard style={styles.productItem}>
