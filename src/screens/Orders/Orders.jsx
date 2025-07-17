@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { colors } from "../../global/colors";
+import colors from "../../global/colors";
 
 const Orders = () => (
   <View style={styles.container}>

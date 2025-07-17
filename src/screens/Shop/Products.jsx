@@ -3,7 +3,7 @@ import { useRoute, useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useState, useCallback } from "react";
 import FlatCard from "../../components/FlatCard";
-import { colors } from "../../global/colors";
+import colors from "../../global/colors";
 import Search from "../../components/Search";
 import { useGetProductsByCategoryQuery } from "../../services/shop/shopApi";
 import Loading from "../../components/Loading";

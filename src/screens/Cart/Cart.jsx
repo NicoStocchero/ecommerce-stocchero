@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
-import { colors } from "../../global/colors";
+import colors from "../../global/colors";
 import { clearCart, removeItemFromCart } from "../../features/cart/cartSlice";
 import FlatCard from "../../components/FlatCard";
 

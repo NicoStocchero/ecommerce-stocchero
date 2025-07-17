@@ -1,42 +1,41 @@
-export const colors = {
+const colors = {
   // Base
   white: "#ffffff",
-  black: "#000000",
+  black: "#141414",
 
-  // Grises para textos, bordes, y fondos neutros
+  // Grises
   gray100: "#f9f9f9",
   gray200: "#f0f0f0",
   gray300: "#dcdcdc",
   gray400: "#bdbdbd",
-  gray500: "#9e9e9e", // textos secundarios
+  gray500: "#9e9e9e", // texto secundario
   gray600: "#757575",
   gray700: "#616161",
   gray800: "#424242",
-  gray900: "#212121", // casi negro
+  gray900: "#222222", // casi negro
 
-  // Primarios
-  primary: "#1e88e5", // Azul moderno (Google/Nike style)
-  primaryLight: "#6ab7ff",
-  primaryDark: "#005cb2",
+  // Naranja principal (Renace)
+  primary: "#FF7600", // Naranja fuerte (main brand)
+  primaryLight: "#FFA040", // Naranja claro (hover/acento suave)
+  primaryDark: "#E65100", // Naranja quemado (para fondos oscuros o CTA fuerte)
 
-  // Secundarios (usables para CTA alternativo, badges, etc.)
-  secondary: "#ff9800", // Naranja vibrante
-  secondaryLight: "#ffc947",
-  secondaryDark: "#c66900",
+  // Secundario (puede ser un amarillo cálido)
+  secondary: "#FFD600", // Amarillo/naranja vibrante
+  secondaryLight: "#FFF59D",
+  secondaryDark: "#C7A500",
 
-  // Éxito / Error / Advertencia / Info
-  success: "#2e7d32",
+  // Éxito / Error / Info
+  success: "#2e7d32", // Verde éxito
   error: "#d32f2f",
-  warning: "#f9a825",
-  info: "#0288d1",
+  warning: "#FFA726", // Naranja claro para alertas
+  info: "#0288d1", // Azul para info ocasional (podés eliminarlo si querés full naranja)
 
-  discount: "#ff5252", // Rojo coral para % OFF
-  highlight: "#e3f2fd", // Fondo suave con azul claro
+  // Otros
+  discount: "#FF5252", // Rojo para % OFF o rebajas
+  highlight: "#FFF3E0", // Fondo cálido para destacar
 
-  // Transparencias útiles
   overlay: "rgba(0,0,0,0.4)",
-
-  // Agregados para ESLint
-  shadow: "#000000", // Para shadowColor
-  textPrimary: "#1a1a1a", // Para textos principales
+  shadow: "#000000",
+  textPrimary: "#222222", // Para títulos y textos oscuros
 };
+export default colors;

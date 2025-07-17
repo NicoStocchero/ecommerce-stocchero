@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
 import FlatCard from "../../components/FlatCard";
 import Search from "../../components/Search";
-import { colors } from "../../global/colors";
+import colors from "../../global/colors";
 import {
   setSelectedCategory,
   setSearchKeyword,

@@ -11,7 +11,7 @@ import { Image } from "expo-image";
 import { useRoute } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import { colors } from "../../global/colors";
+import colors from "../../global/colors";
 import ButtonCount from "../../components/ButtonCount";
 import { safeAddItemToCart } from "../../features/cart/cartThunks";
 import { useGetProductByIdQuery } from "../../services/shop/shopApi";
