@@ -8,9 +8,10 @@ import Search from "../../components/Search";
 import { colors } from "../../global/colors";
 import {
   setSelectedCategory,
-  setProductsFiltered,
   setSearchKeyword,
 } from "../../features/shop/shopSlice";
+import { useGetCategoriesQuery } from "../../services/shop/shopApi";
+import Loading from "../../components/Loading";
 
 const EmptyComponent = ({ keyword }) => (
   <View style={styles.emptyContainer}>
@@ -24,17 +25,17 @@ const EmptyComponent = ({ keyword }) => (
 
 const Categories = ({ navigation }) => {
   const dispatch = useDispatch();
-  const categories = useSelector((state) => state.shop.categories);
-  const products = useSelector((state) => state.shop.products);
+  const { data: categories, isLoading: isLoadingCategories } =
+    useGetCategoriesQuery();
   const keyword = useSelector((state) => state.shop.searchKeyword);
+
+  if (isLoadingCategories) {
+    return <Loading text="Cargando categorías..." />;
+  }
 
   // Cuando el usuario escribe:
   const handleSearch = (text) => {
     dispatch(setSearchKeyword(text));
-    const filtered = products.filter((product) =>
-      product.title.toLowerCase().includes(text.toLowerCase())
-    );
-    dispatch(setProductsFiltered(filtered));
   };
 
   const normalizedKeyword = keyword.trim().toLowerCase();
@@ -44,9 +45,9 @@ const Categories = ({ navigation }) => {
     navigation.navigate("Products", { categoryId });
   };
 
-  const filteredCategories = categories.filter((category) => {
-    return category.title.toLowerCase().includes(normalizedKeyword);
-  });
+  const filteredCategories = categories?.filter((category) =>
+    category.title.toLowerCase().includes(normalizedKeyword)
+  );
 
   const renderCategoryItem = ({ item }) => (
     <Pressable onPress={() => handleCategoryPress(item.id)}>

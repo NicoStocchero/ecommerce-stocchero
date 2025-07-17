@@ -1,11 +1,12 @@
 import { Text, View, StyleSheet, FlatList, Pressable } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { useState } from "react";
-import products from "../../data/products.json";
+import { useState, useCallback } from "react";
 import FlatCard from "../../components/FlatCard";
 import { colors } from "../../global/colors";
 import Search from "../../components/Search";
+import { useGetProductsByCategoryQuery } from "../../services/shop/shopApi";
+import Loading from "../../components/Loading";
 
 const EmptyProductComponent = ({ keyword }) => (
   <View style={styles.emptyContainer}>
@@ -24,10 +25,23 @@ const Products = ({ navigation }) => {
 
   const normalizedKeyword = keyword.trim().toLowerCase();
 
-  const productsFiltered = products.filter(
-    (product) =>
-      product.categoryId === categoryId &&
-      product.title.toLowerCase().includes(normalizedKeyword)
+  const { data: products, isLoading: isLoadingProducts } =
+    useGetProductsByCategoryQuery(categoryId);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setKeyword("");
+      };
+    }, [])
+  );
+
+  if (isLoadingProducts) {
+    return <Loading text="Cargando productos..." />;
+  }
+
+  const productsFiltered = products?.filter((product) =>
+    product.title.toLowerCase().includes(normalizedKeyword)
   );
 
   const renderProductItem = ({ item }) => {

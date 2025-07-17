@@ -1,16 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import categories from "../../data/categories.json";
-import products from "../../data/products.json";
 
 export const shopSlice = createSlice({
   name: "shop",
   initialState: {
-    categories: categories || [],
-    products: products || [],
     selectedCategory: "",
     selectedProduct: {},
-    productsFiltered: [],
-    searchKeyword: "", // ⬅️ Agregar esto
+    searchKeyword: "",
   },
   reducers: {
     setSelectedCategory: (state, action) => {
