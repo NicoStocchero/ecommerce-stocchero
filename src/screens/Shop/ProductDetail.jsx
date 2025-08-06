@@ -1,70 +1,29 @@
 /**
  * @fileoverview ProductDetail screen component for displaying individual product information.
- * Shows detailed product view with add to cart functionality and quantity selection.
+ * Uses the modern UI system with consistent design.
  * @author Stocchero
  * @version 1.0.0
  */
 
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import { Image } from "expo-image";
 import { useRoute } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import colors from "../../global/colors";
 import ButtonCount from "../../components/ButtonCount";
+import { Card, Button } from "../../components/UI";
 import { safeAddItemToCart } from "../../features/cart/cartThunks";
 import { useGetProductByIdQuery } from "../../services/shop/shopApi";
 import Loading from "../../components/Loading";
+import { useSQLite } from "../../hooks/useSQLite";
+import { withErrorHandling } from "../../utils/errorHandler";
 
 /**
- * ProductDetail screen component props
- * @typedef {Object} ProductDetailProps
- * @property {Object} navigation - React Navigation object for screen navigation
- * @property {function} navigation.navigate - Function to navigate to other screens
- * @property {Object} route - React Navigation route object with parameters
- * @property {Object} route.params - Route parameters
- * @property {string} route.params.productId - Selected product ID
- */
-
-/**
- * ProductDetail screen component for displaying individual product information.
- * Shows comprehensive product details including images, description, price, stock status,
- * and quantity selection with add to cart functionality.
- *
- * Features:
- * - RTK Query integration for individual product fetching
- * - Large product image display with optimized loading
- * - Detailed product information (title, price, description, stock)
- * - Quantity selection with stock validation
- * - Add to cart functionality with stock checking
- * - Loading states and error handling
- * - Navigation options after adding to cart
- * - Stock validation with user feedback alerts
- * - Redux integration for cart management
- *
- * @component
- * @param {ProductDetailProps} props - Component props
+ * ProductDetail screen component
+ * @param {Object} props - Component props
+ * @param {Object} props.navigation - React Navigation object
  * @returns {React.JSX.Element} Rendered product detail screen
- *
- * @example
- * ```javascript
- * // Used in ShopStack navigator
- * <Stack.Screen
- *   name="ProductDetail"
- *   component={ProductDetail}
- *   options={{ headerTitle: "" }}
- * />
- *
- * // Navigation from Products screen
- * navigation.navigate("ProductDetail", { productId: "123" });
- * ```
  */
 const ProductDetail = ({ navigation }) => {
   // Get product ID from navigation route
@@ -74,6 +33,9 @@ const ProductDetail = ({ navigation }) => {
 
   // Local quantity state
   const [quantity, setQuantity] = useState(1);
+
+  // SQLite hooks
+  const { saveCartItem } = useSQLite();
 
   // Fetch individual product data
   const { data: product, isLoading: isLoadingProduct } =
@@ -94,25 +56,20 @@ const ProductDetail = ({ navigation }) => {
   }
 
   /**
-   * Handles quantity changes from ButtonCount component
-   * @param {number} newCount - New quantity value
+   * Handles quantity change from ButtonCount component
    */
   const handleQuantityChange = (newCount) => {
     setQuantity(newCount);
   };
 
   /**
-   * Validates if the selected quantity is valid against available stock
-   * @param {number} q - Quantity to validate
-   * @param {number} stock - Available stock
-   * @returns {boolean} True if quantity is valid, false otherwise
+   * Validates quantity against available stock
    */
   const isQuantityValid = (q, stock) => {
     if (q <= 0) {
-      Alert.alert("Cantidad inválida", "Debés agregar al menos 1 unidad.");
+      Alert.alert("Cantidad inválida", "La cantidad debe ser mayor a 0.");
       return false;
     }
-
     if (q > stock) {
       Alert.alert("Stock insuficiente", "No hay suficiente stock disponible.");
       return false;
@@ -123,29 +80,41 @@ const ProductDetail = ({ navigation }) => {
 
   /**
    * Handles adding product to cart with quantity validation
-   * Shows success/error alerts and navigation options
    */
-  const handleAddToCart = async () => {
-    if (!isQuantityValid(quantity, product.stock)) return;
+  const handleAddToCart = withErrorHandling(
+    async () => {
+      if (!isQuantityValid(quantity, product.stock)) return;
 
-    const itemToAdd = { ...product, quantity };
-    const result = await dispatch(safeAddItemToCart(itemToAdd));
-    if (!result) {
-      Alert.alert("Error", "No se pudo agregar al carrito.");
-      return;
-    }
+      const itemToAdd = { ...product, quantity };
+      const result = await dispatch(safeAddItemToCart(itemToAdd));
+      if (!result) {
+        Alert.alert("Error", "No se pudo agregar al carrito.");
+        return;
+      }
 
-    Alert.alert("Éxito", "Producto agregado al carrito", [
-      {
-        text: "Ir al carrito",
-        onPress: () => navigation.navigate("Carrito"),
-      },
-      {
-        text: "Seguir comprando",
-        style: "cancel",
-      },
-    ]);
-  };
+      // Save to SQLite database
+      await saveCartItem({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        quantity: quantity,
+        image: product.mainImage,
+      });
+
+      Alert.alert("Éxito", "Producto agregado al carrito", [
+        {
+          text: "Ir al carrito",
+          onPress: () => navigation.navigate("Carrito"),
+        },
+        {
+          text: "Seguir comprando",
+          style: "cancel",
+        },
+      ]);
+    },
+    "ProductDetail.handleAddToCart",
+    { showAlert: false }
+  );
 
   return (
     <ScrollView style={styles.container}>
@@ -156,20 +125,29 @@ const ProductDetail = ({ navigation }) => {
         transition={300}
         cachePolicy="memory-disk"
       />
-      <View style={styles.content}>
-        <Text style={styles.title}>{product.title}</Text>
-        <Text style={styles.price}>${product.price.toLocaleString()}</Text>
-        <Text style={styles.description}>{product.longDescription}</Text>
-        <Text style={styles.stock}>Stock: {product.stock}</Text>
-        <ButtonCount
-          initial={1}
-          stock={product.stock}
-          onQuantityChange={handleQuantityChange}
-        />
-        <Pressable style={styles.button} onPress={handleAddToCart}>
-          <Text style={styles.buttonText}>Agregar al carrito</Text>
-        </Pressable>
-      </View>
+
+      <Card variant="featured" elevated>
+        <View style={styles.content}>
+          <Text style={styles.title}>{product.title}</Text>
+          <Text style={styles.price}>${product.price.toLocaleString()}</Text>
+          <Text style={styles.description}>{product.longDescription}</Text>
+          <Text style={styles.stock}>Stock: {product.stock}</Text>
+
+          <ButtonCount
+            initial={1}
+            stock={product.stock}
+            onQuantityChange={handleQuantityChange}
+          />
+
+          <Button
+            title="Agregar al carrito"
+            variant="primary"
+            size="large"
+            onPress={handleAddToCart}
+            style={styles.addButton}
+          />
+        </View>
+      </Card>
     </ScrollView>
   );
 };
@@ -179,56 +157,58 @@ export default ProductDetail;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.gray50,
   },
   image: {
     width: "100%",
     height: 320,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
     backgroundColor: colors.white,
   },
   content: {
-    padding: 20,
-    gap: 16,
+    gap: 20,
+    margin: 20,
   },
   title: {
-    fontFamily: "Inter-Bold",
+    fontFamily: "Inter_18pt-Bold",
     fontSize: 24,
-    color: colors.gray900,
+    color: colors.textPrimary,
+    letterSpacing: 0.3,
+    lineHeight: 30,
   },
   price: {
-    fontFamily: "Inter-SemiBold",
-    fontSize: 20,
-    color: colors.success,
+    fontFamily: "Inter_18pt-Bold",
+    fontSize: 24,
+    color: colors.primary,
+    letterSpacing: 0.3,
   },
   stock: {
-    fontFamily: "Inter-Regular",
+    fontFamily: "Inter_18pt-Regular",
     fontSize: 16,
-    color: colors.gray,
+    color: colors.gray600,
+    letterSpacing: 0.2,
   },
   description: {
-    fontFamily: "Inter-Regular",
+    fontFamily: "Inter_18pt-Regular",
     fontSize: 16,
-    color: colors.gray,
-    lineHeight: 22,
+    color: colors.gray600,
+    lineHeight: 24,
+    letterSpacing: 0.2,
   },
-  button: {
-    marginTop: 24,
-    backgroundColor: colors.black,
-    paddingVertical: 14,
-    borderRadius: 12,
+  addButton: {
+    marginTop: 12,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    shadowColor: colors.gray,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
+    padding: 20,
+    backgroundColor: colors.gray50,
   },
-  buttonText: {
-    fontFamily: "Inter-Bold",
-    color: colors.white,
+  errorText: {
+    fontFamily: "Inter_18pt-Regular",
     fontSize: 16,
-    textTransform: "uppercase",
+    color: colors.error,
+    textAlign: "center",
+    letterSpacing: 0.2,
   },
 });
