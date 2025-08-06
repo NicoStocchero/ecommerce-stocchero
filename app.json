@@ -12,20 +12,45 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "googleMapsApiKey": "EXPO_PUBLIC_GMAPS_API_KEY"
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte las tiendas más cercanas.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte las tiendas más cercanas."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "EXPO_PUBLIC_GMAPS_API_KEY"
+        }
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true,
+          "useSQLCipher": true,
+          "android": {
+            "enableFTS": false,
+            "useSQLCipher": false
+          }
+        }
+      ],
+      "expo-location"
     ]
   }
 }
