@@ -12,6 +12,7 @@ import { logout } from "../../features/user/userSlice";
 import {
   updateProfileImage,
   resetProfile,
+  setProfileData,
 } from "../../features/user/userSlice";
 import colors from "../../global/colors";
 import { useSQLite } from "../../hooks/useSQLite";
@@ -20,6 +21,7 @@ import { useProfileImage } from "../../hooks/useProfileImage";
 import { useProfileNavigation } from "../../hooks/useProfileNavigation";
 import { useSession } from "../../hooks/useSession";
 import { useAuthToken } from "../../hooks";
+import { useGetProfileDataQuery } from "../../services/profile/profileApi";
 
 import {
   ProfileHeader,
@@ -38,9 +40,15 @@ import {
 const Profile = ({ navigation }) => {
   const { session, freshToken } = useAuthToken();
   const dispatch = useDispatch();
-  const { user, isAuthenticated, profileImage, isUpdatingImage } = useSelector(
-    (state) => state.user
-  );
+  const { user, isAuthenticated, profileImage, isUpdatingImage, profileData } =
+    useSelector((state) => state.user);
+
+  // Fetch profile data from Firebase
+  const { data: fetchedProfileData, isLoading: isLoadingProfile } =
+    useGetProfileDataQuery(
+      { userId: session?.local_id, authToken: freshToken },
+      { skip: !session?.local_id || !freshToken }
+    );
 
   // SQLite hooks
   const { getSession } = useSQLite();
@@ -88,6 +96,21 @@ const Profile = ({ navigation }) => {
     );
     loadProfileImage();
   }, [session, freshToken, dispatch]);
+
+  /**
+   * Update Redux store when profile data is fetched
+   */
+  useEffect(() => {
+    if (fetchedProfileData && Object.keys(fetchedProfileData).length > 0) {
+      dispatch(setProfileData(fetchedProfileData));
+    }
+  }, [fetchedProfileData, dispatch]);
+
+  // Merge profile data from different sources
+  const mergedProfileData = {
+    ...profileData,
+    ...fetchedProfileData,
+  };
 
   /**
    * Handles profile image change with image picker
@@ -150,7 +173,17 @@ const Profile = ({ navigation }) => {
   if (!isAuthenticated || !user) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>No se pudo cargar el perfil</Text>
+        <View style={styles.errorContainer}>
+          <Ionicons
+            name="person-circle-outline"
+            size={64}
+            color={colors.gray400}
+          />
+          <Text style={styles.errorText}>No se pudo cargar el perfil</Text>
+          <Text style={styles.errorSubtext}>
+            Inicia sesión para ver tu perfil
+          </Text>
+        </View>
       </View>
     );
   }
@@ -168,6 +201,7 @@ const Profile = ({ navigation }) => {
           profileImage={profileImage}
           isUpdatingImage={isUpdatingImage}
           onPressAvatar={handleChangeProfileImage}
+          profileData={mergedProfileData}
         />
 
         {/* Account Management Section */}
@@ -243,12 +277,25 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 20,
   },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+    gap: 16,
+  },
   errorText: {
-    fontFamily: "Inter_18pt-Regular",
-    fontSize: 16,
-    color: colors.error,
+    fontFamily: "Inter_18pt-SemiBold",
+    fontSize: 18,
+    color: colors.textPrimary,
     textAlign: "center",
-    marginTop: 100,
+    letterSpacing: 0.3,
+  },
+  errorSubtext: {
+    fontFamily: "Inter_18pt-Regular",
+    fontSize: 14,
+    color: colors.gray600,
+    textAlign: "center",
     letterSpacing: 0.2,
   },
   divider: {
