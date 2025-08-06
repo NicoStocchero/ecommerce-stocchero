@@ -6,6 +6,8 @@ import { StatusBar } from "expo-status-bar";
 import { Provider } from "react-redux";
 import RootNavigator from "./src/navigation/RootNavigator";
 import { store } from "./src/store/store";
+import { SQLiteProvider } from "expo-sqlite";
+import { migrateDatabase } from "./src/utils/sqlite";
 
 const App = () => {
   const [fontsLoaded, error] = useFonts({
@@ -32,10 +34,12 @@ const App = () => {
   }
 
   return (
-    <Provider store={store}>
-      <StatusBar />
-      <RootNavigator />
-    </Provider>
+    <SQLiteProvider databaseName="ecommerce-app.db" onInit={migrateDatabase}>
+      <Provider store={store}>
+        <StatusBar />
+        <RootNavigator />
+      </Provider>
+    </SQLiteProvider>
   );
 };
 
