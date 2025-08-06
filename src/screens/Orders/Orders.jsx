@@ -1,69 +1,88 @@
 /**
  * @fileoverview Orders screen component for displaying user order history.
- * Shows empty state with placeholder for future order management functionality.
+ * Loads and displays orders from Firebase using ordersApi.
  * @author Stocchero
  * @version 1.0.0
  */
 
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import colors from "../../global/colors";
+import { View, FlatList, StyleSheet } from "react-native";
+import { EmptyState, OrderCard } from "../../components/UI";
+import Loading from "../../components/Loading";
+import { useGetOrdersQuery } from "../../services";
+import { colors } from "../../global/colors";
+import { useAuthToken } from "../../hooks";
 
 /**
- * Orders screen component for displaying user order history and management.
- * Currently shows empty state with plans for future order tracking functionality.
- *
- * Future Features (to be implemented):
- * - Order history list with order details
- * - Order status tracking (pending, shipped, delivered)
- * - Order search and filtering
- * - Individual order detail view
- * - Re-order functionality
- * - Order cancellation for eligible orders
- * - Integration with backend order management system
- *
- * @component
- * @returns {React.JSX.Element} Rendered orders screen with empty state
- *
- * @example
- * ```javascript
- * // Used in OrderStack navigator
- * <Stack.Screen
- *   name="Orders"
- *   component={Orders}
- *   options={{ headerTitle: "Pedidos" }}
- * />
- *
- * // Accessed via TabNavigator "Pedidos" tab
- * ```
+ * Orders screen component with Firebase integration
+ * @returns {React.JSX.Element} Rendered orders screen
  */
-const Orders = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Mis Pedidos</Text>
-    <Text style={styles.emptyText}>No tienes pedidos realizados</Text>
-  </View>
-);
+const Orders = () => {
+  const { session, freshToken, isLoading: authLoading } = useAuthToken();
 
-export default Orders;
+  const {
+    data: orders = [],
+    isLoading: ordersLoading,
+    error,
+  } = useGetOrdersQuery(
+    {
+      userId: session?.local_id,
+      token: freshToken,
+    },
+    {
+      skip: !session?.local_id || !freshToken,
+    }
+  );
+
+  if (authLoading || ordersLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return (
+      <EmptyState
+        title="Error al cargar pedidos"
+        message="No pudimos cargar tu historial de pedidos. Intenta nuevamente."
+        icon="alert-circle-outline"
+        variant="error"
+      />
+    );
+  }
+
+  if (!orders || orders.length === 0) {
+    return (
+      <EmptyState
+        title="No tienes pedidos realizados"
+        message="Cuando realices tu primera compra, aquí podrás ver el historial de tus pedidos"
+        icon="receipt-outline"
+        variant="orders"
+      />
+    );
+  }
+
+  const renderOrder = ({ item }) => <OrderCard order={item} />;
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={orders}
+        renderItem={renderOrder}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
-    justifyContent: "center",
-    alignItems: "center",
+  },
+  listContainer: {
     padding: 20,
-  },
-  title: {
-    fontFamily: "Inter-Bold",
-    fontSize: 24,
-    color: colors.textPrimary || "#1a1a1a",
-    marginBottom: 16,
-  },
-  emptyText: {
-    fontFamily: "Inter-Regular",
-    fontSize: 16,
-    color: colors.gray500 || "#999",
-    textAlign: "center",
+    gap: 16,
   },
 });
+
+export default Orders;
