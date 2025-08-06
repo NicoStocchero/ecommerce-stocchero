@@ -18,10 +18,13 @@
       },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte las tiendas más cercanas.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte las tiendas más cercanas."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte las tiendas más cercanas.",
+        "CFBundleDevelopmentRegion": "es",
+        "CFBundleLocalizations": ["es", "en"]
       }
     },
     "android": {
+      "package": "com.stocchero.ecommerce",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -32,7 +35,14 @@
           "apiKey": "EXPO_PUBLIC_GMAPS_API_KEY"
         }
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "locale": "es"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -50,7 +60,8 @@
           }
         }
       ],
-      "expo-location"
+      "expo-location",
+      "expo-image-picker"
     ]
   }
 }
