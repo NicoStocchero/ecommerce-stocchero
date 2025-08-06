@@ -185,29 +185,28 @@ const Login = ({ navigation }) => {
         email: formData.email,
         password: formData.password,
         returnSecureToken: true,
+      }).unwrap();
+
+      // Save session to SQLite
+      await saveSession({
+        email: result.email,
+        localId: result.localId,
+        token: result.idToken,
+        refreshToken: result.refreshToken,
       });
 
-      if (result.data) {
-        // Save session to SQLite
-        await saveSession({
-          email: result.data.email,
-          localId: result.data.localId,
-          token: result.data.idToken,
-          refreshToken: result.data.refreshToken,
-        });
-
-        dispatch(
-          authSuccess({
-            user: {
-              email: result.data.email,
-              localId: result.data.localId,
-            },
-            token: result.data.idToken,
-            refreshToken: result.data.refreshToken,
-          })
-        );
-      }
+      dispatch(
+        authSuccess({
+          user: {
+            email: result.email,
+            localId: result.localId,
+          },
+          token: result.idToken,
+          refreshToken: result.refreshToken,
+        })
+      );
     } catch (error) {
+      console.log("❌ Login error:", error);
       const errorMessage = getFirebaseErrorMessage(error, "login");
       dispatch(authFailure(errorMessage));
     }
