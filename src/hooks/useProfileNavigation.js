@@ -33,14 +33,10 @@ import { Alert } from "react-native";
 export const useProfileNavigation = (navigation) => {
   /**
    * Handles navigation to edit profile screen.
-   * Shows placeholder alert for future implementation.
    */
   const handleEditProfile = useCallback(() => {
-    Alert.alert(
-      "Función pendiente",
-      "La edición de perfil se implementará próximamente"
-    );
-  }, []);
+    navigation.navigate("EditProfile");
+  }, [navigation]);
 
   /**
    * Handles navigation to change password screen.

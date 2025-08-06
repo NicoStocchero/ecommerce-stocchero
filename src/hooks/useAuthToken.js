@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { useSQLite } from "./index";
+import { useSQLite } from "./useSQLite";
 
 /**
  * Custom hook for Firebase token management
