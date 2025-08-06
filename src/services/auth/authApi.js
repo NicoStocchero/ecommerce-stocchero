@@ -6,6 +6,10 @@
  */
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import {
+  validateRequiredParams,
+  withServiceErrorHandling,
+} from "../errorService";
 
 // Environment variables for Firebase configuration
 const baseAuthURL = process.env.EXPO_PUBLIC_AUTH_BASE_URL;
@@ -25,7 +29,14 @@ const apiKey = process.env.EXPO_PUBLIC_API_KEY;
  */
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({ baseUrl: baseAuthURL }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: baseAuthURL,
+    prepareHeaders: (headers) => {
+      headers.set("Content-Type", "application/json");
+      return headers;
+    },
+  }),
+  tagTypes: ["Auth"],
   endpoints: (builder) => ({
     /**
      * Mutation for user registration with Firebase Authentication.
@@ -40,12 +51,24 @@ export const authApi = createApi({
      * @throws {Object} Firebase error response
      */
     signUp: builder.mutation({
-      query: (auth) => ({
-        url: `/accounts:signUp?key=${apiKey}`,
-        method: "POST",
-        body: auth,
-      }),
+      query: (auth) => {
+        // Validate required parameters
+        validateRequiredParams(auth, ["email", "password"], "signUp");
+
+        return {
+          url: `/accounts:signUp?key=${apiKey}`,
+          method: "POST",
+          body: auth,
+        };
+      },
+      transformErrorResponse: (response) => {
+        if (response.status === 400) {
+          return response.data?.error?.message || "Registration failed";
+        }
+        return "Error de registro. Intenta nuevamente.";
+      },
     }),
+
     /**
      * Mutation for user login with Firebase Authentication.
      * Authenticates existing user with email and password.
@@ -59,11 +82,22 @@ export const authApi = createApi({
      * @throws {Object} Firebase error response
      */
     login: builder.mutation({
-      query: (auth) => ({
-        url: `/accounts:signInWithPassword?key=${apiKey}`,
-        method: "POST",
-        body: auth,
-      }),
+      query: (auth) => {
+        // Validate required parameters
+        validateRequiredParams(auth, ["email", "password"], "login");
+
+        return {
+          url: `/accounts:signInWithPassword?key=${apiKey}`,
+          method: "POST",
+          body: auth,
+        };
+      },
+      transformErrorResponse: (response) => {
+        if (response.status === 400) {
+          return response.data?.error?.message || "Login failed";
+        }
+        return "Error de inicio de sesión. Intenta nuevamente.";
+      },
     }),
   }),
 });
