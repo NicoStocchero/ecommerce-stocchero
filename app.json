@@ -20,7 +20,10 @@
         "NSLocationWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte las tiendas más cercanas.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte las tiendas más cercanas.",
         "CFBundleDevelopmentRegion": "es",
-        "CFBundleLocalizations": ["es", "en"]
+        "CFBundleLocalizations": [
+          "es",
+          "en"
+        ]
       }
     },
     "android": {
@@ -36,11 +39,12 @@
         }
       },
       "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ],
       "locale": "es"
     },
@@ -62,6 +66,12 @@
       ],
       "expo-location",
       "expo-image-picker"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f5b47ef5-814d-4339-a017-503f56d2897d"
+      }
+    },
+    "owner": "nicostocchero-coder"
   }
 }
