@@ -23,7 +23,8 @@ import { z } from "zod";
  * ```javascript
  * const result = passwordRules.safeParse("MiPassword123!");
  * if (!result.success) {
- *   console.log(result.error.issues[0].message);
+ *   // Handle validation error
+ *   const errorMessage = result.error.issues[0].message;
  * }
  * ```
  */
@@ -56,9 +57,11 @@ export const passwordRules = z
  *
  * const result = signUpSchema.safeParse(formData);
  * if (result.success) {
- *   console.log("Valid data:", result.data);
+ *   // Proceed with registration
+ *   await registerUser(result.data);
  * } else {
- *   console.log("Validation errors:", result.error.format());
+ *   // Handle validation errors
+ *   const errors = result.error.format();
  * }
  * ```
  */
