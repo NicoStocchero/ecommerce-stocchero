@@ -1,5 +1,11 @@
-# Firebase Auth (público pero sensible)
-EXPO_PUBLIC_API_KEY=AIzaSyA...TuClave
+# 🔐 Firebase Auth (public but sensitive)
+EXPO_PUBLIC_API_KEY=AIzaSyA...tuClave
 
-# Firebase Realtime Database
-EXPO_PUBLIC_BASE_RTDB_URL=https://your-project-default-rtdb.firebaseio.com
+# 🔗 Firebase Realtime Database base URL
+EXPO_PUBLIC_BASE_RTDB_URL=https://your-project-id-default-rtdb.firebaseio.com
+
+# 🔑 Auth base URL (optional, used for custom login routes)
+EXPO_PUBLIC_AUTH_BASE_URL=https://identitytoolkit.googleapis.com/v1/accounts
+
+# 🗺️ Google Maps API Key (for geolocation / maps)
+EXPO_PUBLIC_GMAPS_API_KEY=AIzaSyB...tuClaveGmaps
