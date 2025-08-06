@@ -30,6 +30,10 @@ Código fuente completo: [GitHub Repository](https://github.com/NicoStocchero/ec
 
 - ✅ Sistema de registro y login con Firebase Auth
 - ✅ Perfil de usuario con foto de perfil (cámara/galería)
+- ✅ **Edición completa de perfil** con formularios validados
+- ✅ **Subida de imágenes** a Firebase Realtime Database
+- ✅ **Validación de datos** con Zod schemas
+- ✅ **Sincronización en tiempo real** del perfil
 - ✅ Persistencia de sesión con SQLite
 - ✅ Gestión de tokens y refresh automático
 
@@ -118,6 +122,12 @@ src/
 - **Custom Fonts** - Tipografía Inter
 - **Custom Design System** - Sistema de colores y componentes
 
+#### **Validación y Formularios**
+
+- **Zod** - Validación de esquemas
+- **React Hook Form** - Manejo de formularios
+- **Custom Validation** - Validación personalizada
+
 ---
 
 ## 🎯 Objetivos Cumplidos
@@ -170,6 +180,16 @@ src/
 - SQLite para datos locales
 - Sincronización con Firebase
 - Cache de productos y sesión
+
+### ✅ **Gestión de Perfil Avanzada**
+
+- ✅ **Edición completa de perfil** con campos personalizables
+- ✅ **Subida de imágenes** con compresión automática
+- ✅ **Validación en tiempo real** de datos de usuario
+- ✅ **Sincronización bidireccional** con Firebase
+- ✅ **Manejo de estados** de carga y error
+- ✅ **Campos opcionales** con validación condicional
+- ✅ **Formularios dinámicos** con configuración flexible
 
 ---
 
@@ -359,6 +379,27 @@ colors = {
 3. Token se refresca automáticamente
 4. Orden aparece en historial
 5. Datos se sincronizan en tiempo real
+
+### **Gestión de Perfil**
+
+1. Usuario edita información de perfil
+2. **Formulario valida datos con Zod en tiempo real**
+3. **Validación de campos específicos** (teléfono argentino, edad, URL)
+4. Imagen se convierte a base64 automáticamente
+5. Datos se envían a Firebase Realtime Database
+6. **Redux actualiza estado local inmediatamente**
+7. **SQLite sincroniza datos offline**
+8. **Validación de campos opcionales** con reglas condicionales
+
+### ✅ **Validación y Formularios**
+
+- ✅ **Validación con Zod** para todos los formularios
+- ✅ **Esquemas de validación** para registro, login y perfil
+- ✅ **Validación en tiempo real** con feedback inmediato
+- ✅ **Validación de contraseñas** con reglas de seguridad estrictas
+- ✅ **Validación de campos personalizados** (teléfono argentino, fecha, URL)
+- ✅ **Manejo de errores** específicos por campo
+- ✅ **Formularios reactivos** con validación instantánea
 
 ---
 
