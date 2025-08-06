@@ -9,7 +9,14 @@
     "web": "expo start --web",
     "lint": "eslint . --ext .js,.jsx",
     "lint:fix": "eslint . --ext .js,.jsx --fix",
-    "lint:check": "eslint . --ext .js,.jsx --max-warnings 0"
+    "lint:check": "eslint . --ext .js,.jsx --max-warnings 0",
+    "commit": "git-cz",
+    "commit:custom": "node scripts/commit.js"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -20,19 +27,26 @@
     "expo": "~53.0.10",
     "expo-font": "~13.3.1",
     "expo-image": "~2.3.0",
+    "expo-image-picker": "^16.1.4",
+    "expo-location": "^18.1.6",
     "expo-splash-screen": "~0.30.9",
+    "expo-sqlite": "^15.2.14",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
     "react-native": "0.79.3",
+    "react-native-maps": "1.20.1",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-redux": "^9.2.0",
     "redux": "^5.0.1",
-    "zod": "^4.0.5"
+    "zod": "^4.0.5",
+    "expo-dev-client": "~5.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@babel/eslint-parser": "^7.28.0",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
