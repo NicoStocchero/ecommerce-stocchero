@@ -6,7 +6,7 @@
  */
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Profile } from "../../screens/Profile";
+import { Profile, EditProfile } from "../../screens/Profile";
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +42,14 @@ const ProfileStack = () => {
         name="Profile"
         component={Profile}
         options={{ headerTitle: "Mi Perfil" }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfile}
+        options={{
+          headerTitle: "Editar Perfil",
+          headerBackTitle: "Volver",
+        }}
       />
     </Stack.Navigator>
   );
