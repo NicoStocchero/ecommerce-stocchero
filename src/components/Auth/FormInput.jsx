@@ -130,6 +130,9 @@ const FormInput = forwardRef(
             keyboardType={keyboardType}
             autoCapitalize={autoCapitalize}
             autoComplete={autoComplete}
+            autoCorrect={false}
+            spellCheck={false}
+            textContentType="none"
             {...props}
           />
           {secureTextEntry &&
