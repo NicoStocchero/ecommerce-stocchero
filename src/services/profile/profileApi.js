@@ -155,11 +155,16 @@ export const profileApi = createApi({
           );
 
           if (!response.ok) {
-            throw new Error("Failed to update profile data");
+            const errorText = await response.text();
+            throw new Error(
+              `Failed to update profile data: ${response.status} - ${errorText}`
+            );
           }
 
           const result = await response.json();
-          return createSuccessResponse(result);
+
+          // Return the data in the correct format for RTK Query
+          return { data: result };
         },
         "PROFILE",
         "profileUpdate"
