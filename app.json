@@ -20,10 +20,7 @@
         "NSLocationWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte las tiendas más cercanas.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte las tiendas más cercanas.",
         "CFBundleDevelopmentRegion": "es",
-        "CFBundleLocalizations": [
-          "es",
-          "en"
-        ]
+        "CFBundleLocalizations": ["es", "en"]
       }
     },
     "android": {
@@ -69,7 +66,8 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "f5b47ef5-814d-4339-a017-503f56d2897d"
+        "projectId": "f5b47ef5-814d-4339-a017-503f56d2897d",
+        "appVersionSource": "remote"
       }
     },
     "owner": "nicostocchero-coder"
