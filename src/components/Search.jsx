@@ -66,6 +66,10 @@ const Search = ({ keyword, setKeyword }) => {
         placeholderTextColor={colors.gray500}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
+        autoCorrect={false}
+        spellCheck={false}
+        textContentType="none"
+        returnKeyType="search"
       />
     </View>
   );

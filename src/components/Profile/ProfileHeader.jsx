@@ -18,6 +18,7 @@ import colors from "../../global/colors";
  * @property {string|null} profileImage - Profile image URI
  * @property {boolean} isUpdatingImage - Loading state for image updates
  * @property {function} onPressAvatar - Callback when avatar is pressed
+ * @property {Object|null} profileData - Additional profile data
  */
 
 /**
@@ -43,6 +44,7 @@ const ProfileHeader = ({
   profileImage,
   isUpdatingImage,
   onPressAvatar,
+  profileData,
 }) => {
   /**
    * Gets user initials from email for fallback avatar
@@ -55,11 +57,12 @@ const ProfileHeader = ({
   };
 
   /**
-   * Gets display name from email
+   * Gets display name from profile data or email
    * @param {string} email - User's email address
    * @returns {string} Display name or email username
    */
   const getDisplayName = (email) => {
+    if (profileData?.displayName) return profileData.displayName;
     if (!email) return "Usuario";
     return email.split("@")[0];
   };
@@ -68,7 +71,12 @@ const ProfileHeader = ({
     <View style={styles.headerSection}>
       <View style={styles.profileHeader}>
         <View style={styles.avatarSection}>
-          <Pressable onPress={onPressAvatar} style={styles.avatarContainer}>
+          <Pressable
+            onPress={onPressAvatar}
+            style={styles.avatarContainer}
+            accessibilityLabel="Cambiar foto de perfil"
+            accessibilityHint="Toca para cambiar tu foto de perfil"
+          >
             {profileImage ? (
               <Image
                 source={{ uri: profileImage }}
@@ -96,7 +104,11 @@ const ProfileHeader = ({
             {isUpdatingImage && (
               <View style={styles.loadingOverlay}>
                 <View style={styles.loadingSpinner}>
-                  <Text style={styles.loadingText}>⋯</Text>
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={20}
+                    color={colors.primary}
+                  />
                 </View>
               </View>
             )}
@@ -106,6 +118,9 @@ const ProfileHeader = ({
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{getDisplayName(user?.email)}</Text>
           <Text style={styles.userEmail}>{user?.email}</Text>
+          {profileData?.occupation && (
+            <Text style={styles.userOccupation}>{profileData.occupation}</Text>
+          )}
           <View style={styles.statusContainer}>
             <View style={styles.statusDot} />
             <Text style={styles.userStatus}>Cuenta activa</Text>
@@ -201,11 +216,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: {
-    fontFamily: "Inter_18pt-Bold",
-    fontSize: 16,
-    color: colors.primary,
-  },
+
   userInfo: {
     flex: 1,
     gap: 6,
@@ -238,6 +249,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.success,
     letterSpacing: 0.3,
+  },
+  userOccupation: {
+    fontFamily: "Inter_18pt-Regular",
+    fontSize: 13,
+    color: colors.gray500,
+    letterSpacing: 0.2,
+    fontStyle: "italic",
   },
 });
 

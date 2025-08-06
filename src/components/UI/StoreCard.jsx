@@ -43,7 +43,7 @@ const StoreCard = ({
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.storeName} numberOfLines={1}>
-            {store.title}
+            {store.title || "Tienda"}
           </Text>
           <Ionicons
             name="chevron-forward"
@@ -53,21 +53,37 @@ const StoreCard = ({
         </View>
 
         <Text style={styles.storeAddress} numberOfLines={2}>
-          {store.address}
+          {store.address || "Dirección no disponible"}
         </Text>
 
         <Text style={styles.storeHours} numberOfLines={1}>
-          {store.hours}
+          {store.hours || "Horarios no disponibles"}
         </Text>
 
-        {variant === "featured" && store.phone && (
-          <Text style={styles.storePhone}>{store.phone}</Text>
-        )}
+        {variant === "featured" && (
+          <>
+            {store.phone && (
+              <Text style={styles.storePhone}>{store.phone}</Text>
+            )}
 
-        {variant === "featured" && store.services && formatServices && (
-          <Text style={styles.storeServices} numberOfLines={1}>
-            {formatServices(store.services)}
-          </Text>
+            {store.services && formatServices && (
+              <Text style={styles.storeServices} numberOfLines={1}>
+                {formatServices(store.services)}
+              </Text>
+            )}
+
+            {store.description && (
+              <Text style={styles.storeDescription} numberOfLines={2}>
+                {store.description}
+              </Text>
+            )}
+
+            {!store.phone && !store.services && !store.description && (
+              <Text style={styles.storeDescription} numberOfLines={2}>
+                Información adicional disponible en la tienda
+              </Text>
+            )}
+          </>
         )}
       </View>
     </Card>
@@ -78,6 +94,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     gap: 12,
+    minHeight: 80,
   },
   header: {
     flexDirection: "row",
@@ -117,10 +134,22 @@ const styles = StyleSheet.create({
     color: colors.gray500,
     letterSpacing: 0.3,
   },
+  storeDescription: {
+    fontFamily: "Inter_18pt-Regular",
+    fontSize: 13,
+    color: colors.gray600,
+    lineHeight: 18,
+    letterSpacing: 0.2,
+  },
   selectedCard: {
-    backgroundColor: colors.highlight,
+    backgroundColor: colors.white,
     borderColor: colors.primary,
     borderWidth: 2,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
   },
 });
 

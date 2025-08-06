@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
     padding: 28,
     marginVertical: 12,
     marginHorizontal: 16,
+    minHeight: 120,
   },
   elevated: {
     shadowColor: colors.shadow,

@@ -29,23 +29,30 @@ const StoresList = ({
   selectedStore,
   onStoreSelect,
   formatServices,
-}) => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Todas las tiendas</Text>
-    <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-      {stores.map((store) => (
-        <StoreCard
-          key={store.id}
-          store={store}
-          onPress={() => onStoreSelect(store)}
-          variant="compact"
-          selected={selectedStore?.id === store.id}
-          formatServices={formatServices}
-        />
-      ))}
-    </ScrollView>
-  </View>
-);
+}) => {
+  const scrollViewHeight = selectedStore ? 400 : 300;
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Todas las tiendas</Text>
+      <ScrollView
+        style={[styles.scrollView, { maxHeight: scrollViewHeight }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {stores.map((store) => (
+          <StoreCard
+            key={store.id}
+            store={store}
+            onPress={() => onStoreSelect(store)}
+            variant={selectedStore?.id === store.id ? "featured" : "compact"}
+            selected={selectedStore?.id === store.id}
+            formatServices={formatServices}
+          />
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -63,7 +70,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   scrollView: {
-    maxHeight: 300,
+    // Height is set dynamically in the component
   },
 });
 

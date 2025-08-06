@@ -48,7 +48,13 @@ const ProfileMenuItem = ({
   onPress,
   isDestructive = false,
 }) => (
-  <Pressable onPress={onPress} style={styles.menuItem}>
+  <Pressable
+    onPress={onPress}
+    style={styles.menuItem}
+    accessibilityRole="button"
+    accessibilityLabel={title}
+    accessibilityHint={subtitle}
+  >
     <View style={styles.menuItemContent}>
       <Text
         style={[styles.menuItemTitle, isDestructive && styles.destructiveText]}
@@ -57,7 +63,11 @@ const ProfileMenuItem = ({
       </Text>
       {subtitle && <Text style={styles.menuItemSubtitle}>{subtitle}</Text>}
     </View>
-    <Text style={styles.menuItemArrow}>›</Text>
+    <Text
+      style={[styles.menuItemArrow, isDestructive && styles.destructiveArrow]}
+    >
+      ›
+    </Text>
   </Pressable>
 );
 
@@ -91,6 +101,9 @@ const styles = StyleSheet.create({
     color: colors.gray400,
   },
   destructiveText: {
+    color: colors.error,
+  },
+  destructiveArrow: {
     color: colors.error,
   },
 });
