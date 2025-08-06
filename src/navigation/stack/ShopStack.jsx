@@ -7,6 +7,7 @@
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Categories, Products, ProductDetail } from "../../screens/Shop";
+import { StoreLocator } from "../../screens/Location";
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +34,7 @@ const Stack = createNativeStackNavigator();
  *
  * // Navigation flow:
  * // Categories → Products (with categoryId param) → ProductDetail (with productId param)
+ * // StoreLocator (for store locations)
  * ```
  */
 const ShopStack = () => {
@@ -52,6 +54,11 @@ const ShopStack = () => {
         name="ProductDetail"
         component={ProductDetail}
         options={{ headerTitle: "" }}
+      />
+      <Stack.Screen
+        name="StoreLocator"
+        component={StoreLocator}
+        options={{ headerTitle: "Ubicación de Tiendas" }}
       />
     </Stack.Navigator>
   );
