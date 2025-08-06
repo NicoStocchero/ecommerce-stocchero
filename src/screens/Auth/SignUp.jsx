@@ -14,6 +14,7 @@ import {
   ScrollView,
   Text,
   Keyboard,
+  Alert,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -31,6 +32,7 @@ import {
   ErrorMessage,
   AuthDivider,
   AuthButton,
+  PasswordRequirements,
 } from "../../components/Auth";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrorMessage";
 
@@ -80,6 +82,7 @@ const SignUp = ({ navigation }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState(emptyErrors(formData));
   const [touched, setTouched] = useState({});
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   // Refs for keyboard navigation
   const passwordRef = useRef(null);
@@ -91,11 +94,23 @@ const SignUp = ({ navigation }) => {
   const [signUp, { isLoading, error: apiError }] = useSignUpMutation();
 
   /**
-   * Effect to navigate to shop when user is authenticated
+   * Validates email field specifically
+   * @param {string} email - Email to validate
+   * @returns {string} Error message or empty string if valid
    */
-  useEffect(() => {
-    if (isAuthenticated) navigation.navigate("Shop");
-  }, [isAuthenticated, navigation]);
+  const validateEmail = (email) => {
+    if (!email || email.trim() === "") {
+      return "El email es requerido";
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Ingresa un email válido";
+    }
+
+    return "";
+  };
 
   /**
    * Updates form data and clears field errors when user types
@@ -104,6 +119,7 @@ const SignUp = ({ navigation }) => {
    */
   const updateFormData = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
     if (errors[field] && touched[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
@@ -115,7 +131,44 @@ const SignUp = ({ navigation }) => {
    */
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
-    const errorMsg = validateField(signUpSchema, formData, field);
+
+    // Hide password requirements when leaving password field
+    if (field === "password") {
+      setIsPasswordFocused(false);
+    }
+
+    let errorMsg = "";
+
+    // Field-specific validation
+    if (field === "email") {
+      errorMsg = validateEmail(formData.email);
+    } else if (field === "password") {
+      errorMsg = validateField(signUpSchema, formData, field);
+
+      // Special validation for password to check if confirmPassword matches when both are filled
+      if (
+        formData.confirmPassword &&
+        formData.password !== formData.confirmPassword
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: errorMsg,
+          confirmPassword: "Las contraseñas no coinciden",
+        }));
+        return;
+      }
+    } else if (field === "confirmPassword") {
+      errorMsg = validateField(signUpSchema, formData, field);
+
+      // Special validation for confirmPassword to check if it matches password
+      if (
+        formData.confirmPassword &&
+        formData.password !== formData.confirmPassword
+      ) {
+        errorMsg = "Las contraseñas no coinciden";
+      }
+    }
+
     setErrors((prev) => ({ ...prev, [field]: errorMsg }));
   };
 
@@ -135,13 +188,29 @@ const SignUp = ({ navigation }) => {
       });
       return false;
     }
+
+    // Additional validation for password confirmation
+    if (data.password !== data.confirmPassword) {
+      setErrors({
+        email: "",
+        password: "",
+        confirmPassword: "Las contraseñas no coinciden",
+      });
+      setTouched({
+        email: true,
+        password: true,
+        confirmPassword: true,
+      });
+      return false;
+    }
+
     setErrors(emptyErrors(data));
     return true;
   };
 
   /**
    * Handles signup form submission
-   * Validates form, calls signup API, and dispatches appropriate actions
+   * Validates form, calls signup API, and navigates to login on success
    */
   const handleSignUp = async () => {
     try {
@@ -155,15 +224,16 @@ const SignUp = ({ navigation }) => {
       });
 
       if (result.data) {
-        dispatch(
-          authSuccess({
-            user: {
-              email: result.data.email,
-              localId: result.data.localId,
+        // Show success message and navigate to login
+        Alert.alert(
+          "Cuenta Creada",
+          "Tu cuenta ha sido creada exitosamente. Por favor, inicia sesión.",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("Login"),
             },
-            token: result.data.idToken,
-            refreshToken: result.data.refreshToken,
-          })
+          ]
         );
       }
     } catch (error) {
@@ -221,6 +291,7 @@ const SignUp = ({ navigation }) => {
               value={formData.password}
               onChangeText={(value) => updateFormData("password", value)}
               onBlur={() => handleBlur("password")}
+              onFocus={() => setIsPasswordFocused(true)}
               placeholder="Ingresa tu contraseña"
               error={errors.password}
               touched={touched.password}
@@ -232,7 +303,12 @@ const SignUp = ({ navigation }) => {
               ref={passwordRef}
               returnKeyType="next"
               onSubmitEditing={() => confirmPasswordRef.current?.focus()}
-            />
+            >
+              <PasswordRequirements
+                password={formData.password}
+                show={isPasswordFocused && formData.password.length > 0}
+              />
+            </FormInput>
             <FormInput
               label="Confirmar Contraseña"
               icon="lock-closed-outline"

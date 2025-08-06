@@ -24,6 +24,7 @@ import colors from "../../global/colors";
  * @property {string} value - Current input value
  * @property {function} onChangeText - Callback when text changes
  * @property {function} [onBlur] - Callback when input loses focus
+ * @property {function} [onFocus] - Callback when input gains focus
  * @property {string} [placeholder] - Placeholder text
  * @property {string} [error] - Error message to display
  * @property {boolean} [touched] - Whether the field has been touched/focused
@@ -33,6 +34,7 @@ import colors from "../../global/colors";
  * @property {string} [keyboardType="default"] - Keyboard type for input
  * @property {string} [autoCapitalize="none"] - Auto-capitalization behavior
  * @property {string} [autoComplete="off"] - Auto-complete behavior
+ * @property {React.ReactNode} [children] - Additional content to display below input
  */
 
 /**
@@ -79,6 +81,7 @@ const FormInput = forwardRef(
       value,
       onChangeText,
       onBlur,
+      onFocus,
       placeholder,
       error,
       touched,
@@ -88,6 +91,7 @@ const FormInput = forwardRef(
       keyboardType = "default",
       autoCapitalize = "none",
       autoComplete = "off",
+      children,
       ...props
     },
     ref
@@ -125,7 +129,10 @@ const FormInput = forwardRef(
               setIsFocused(false);
               onBlur && onBlur(e);
             }}
-            onFocus={() => setIsFocused(true)}
+            onFocus={(e) => {
+              setIsFocused(true);
+              onFocus && onFocus(e);
+            }}
             secureTextEntry={secureTextEntry && !showPassword}
             keyboardType={keyboardType}
             autoCapitalize={autoCapitalize}
@@ -154,6 +161,7 @@ const FormInput = forwardRef(
             )}
         </View>
         {error && touched && <Text style={styles.errorText}>{error}</Text>}
+        {children}
       </View>
     );
   }

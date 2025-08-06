@@ -36,12 +36,13 @@ export const useAuthToken = () => {
 
         if (!sessionData?.local_id || !sessionData?.refresh_token) {
           setSession(sessionData);
+          setFreshToken(null);
           setIsLoading(false);
           return;
         }
 
-        // Refresh Firebase token
-        const refreshResponse = await fetch(
+        // Always try to refresh the token
+        const response = await fetch(
           `https://securetoken.googleapis.com/v1/token?key=${process.env.EXPO_PUBLIC_API_KEY}`,
           {
             method: "POST",
@@ -53,20 +54,24 @@ export const useAuthToken = () => {
           }
         );
 
-        const refreshData = await refreshResponse.json();
+        const data = await response.json();
 
-        if (refreshData.access_token) {
-          setFreshToken(refreshData.access_token);
+        if (data.access_token) {
+          setFreshToken(data.access_token);
           setSession(sessionData);
         } else {
-          console.log("❌ Token refresh failed:", refreshData);
           // Fallback to original token if refresh fails
           setFreshToken(sessionData.token);
           setSession(sessionData);
         }
       } catch (err) {
-        console.log("❌ Auth token error:", err);
         setError(err);
+        // Try to use original token as fallback
+        const sessionData = await getSession();
+        if (sessionData?.token) {
+          setFreshToken(sessionData.token);
+          setSession(sessionData);
+        }
       } finally {
         setIsLoading(false);
       }

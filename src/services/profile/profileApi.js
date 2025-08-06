@@ -77,7 +77,7 @@ export const profileApi = createApi({
           const rtdbResponse = await fetch(
             `${baseRTDBURL}/users/${userId}/profile.json?auth=${authToken}`,
             {
-              method: "PUT",
+              method: "PATCH",
               headers: {
                 "Content-Type": "application/json",
               },
@@ -87,6 +87,12 @@ export const profileApi = createApi({
 
           if (!rtdbResponse.ok) {
             const errorText = await rtdbResponse.text();
+
+            // Handle authentication errors specifically
+            if (rtdbResponse.status === 401 || rtdbResponse.status === 403) {
+              throw new Error("Authentication failed. Please log in again.");
+            }
+
             throw new Error(
               `Failed to save profile image to RTDB: ${rtdbResponse.status} - ${errorText}`
             );

@@ -10,6 +10,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { useUploadProfileImageMutation } from "../services";
 import { useSQLite } from "./useSQLite";
+import { useAuthToken } from "./useAuthToken";
 import {
   updateProfileImage,
   setIsUpdatingImage,
@@ -41,6 +42,7 @@ export const useProfileImage = () => {
     (state) => state.user
   );
   const { getSession, saveSession } = useSQLite();
+  const { session, freshToken } = useAuthToken();
   const [uploadProfileImage] = useUploadProfileImageMutation();
   const { requestPermissions } = useImagePermissions();
 
@@ -87,11 +89,16 @@ export const useProfileImage = () => {
   const uploadImage = useCallback(
     async (imageUri) => {
       try {
+        // Check if we have valid authentication
+        if (!session?.local_id || !freshToken) {
+          throw new Error("No authentication available");
+        }
+
         // Upload to Firebase Realtime Database
         const base64Data = await uploadProfileImage({
           imageUri,
-          userId: user.localId,
-          authToken: user.token || user.accessToken,
+          userId: session.local_id,
+          authToken: freshToken,
         }).unwrap();
 
         // Update Redux state with base64 data
@@ -99,30 +106,45 @@ export const useProfileImage = () => {
 
         // Save base64 data to local database
         const currentSession = await getSession();
-        console.log("🔄 Current session:", currentSession); // DEBUG
-        console.log("🔄 Saving profile image to session..."); // DEBUG
         await saveSession({
           email: currentSession.email,
           localId: currentSession.local_id,
           token: currentSession.token,
           refreshToken: currentSession.refresh_token,
-          profileImage: base64Data, // Esta es la clave correcta para saveSession
+          profileImage: base64Data,
         });
-        console.log("✅ Profile image saved successfully!"); // DEBUG
 
         return true;
       } catch (error) {
-        handleError(error, "useProfileImage.uploadImage", {
-          showAlert: true,
-          customMessage: "Error al subir la imagen. Intenta nuevamente.",
-        });
+        // Handle authentication errors specifically
+        if (
+          error?.status === 401 ||
+          error?.status === 403 ||
+          error?.message?.includes("Authentication failed")
+        ) {
+          handleError(error, "useProfileImage.uploadImage", {
+            showAlert: true,
+            customMessage:
+              "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+          });
+        } else if (error?.message?.includes("Failed to save profile image")) {
+          handleError(error, "useProfileImage.uploadImage", {
+            showAlert: true,
+            customMessage:
+              "Error de base de datos al subir la imagen. Intenta nuevamente.",
+          });
+        } else {
+          handleError(error, "useProfileImage.uploadImage", {
+            showAlert: true,
+            customMessage: "Error al subir la imagen. Intenta nuevamente.",
+          });
+        }
         return false;
       }
     },
     [
-      user?.localId,
-      user?.token,
-      user?.accessToken,
+      session?.local_id,
+      freshToken,
       uploadProfileImage,
       dispatch,
       getSession,

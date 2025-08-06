@@ -75,27 +75,48 @@ const Profile = ({ navigation }) => {
             try {
               const firebaseUrl = `${process.env.EXPO_PUBLIC_BASE_RTDB_URL}/users/${session.local_id}/profile.json?auth=${freshToken}`;
               const response = await fetch(firebaseUrl);
+
+              if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                  // Authentication error - redirect to login
+                  Alert.alert(
+                    "Error de Autenticación",
+                    "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+                    [
+                      {
+                        text: "OK",
+                        onPress: () => navigation.navigate("Login"),
+                      },
+                    ]
+                  );
+                  return;
+                }
+                throw new Error(
+                  `HTTP ${response.status}: ${response.statusText}`
+                );
+              }
+
               const firebaseData = await response.json();
               if (firebaseData && firebaseData.profileImage) {
                 dispatch(updateProfileImage(firebaseData.profileImage));
                 return;
               }
             } catch (firebaseError) {
-              // Silent fallback to SQLite
+              // Silent fallback to SQLite for non-auth errors
             }
           }
           if (session && session.profile_image) {
             dispatch(updateProfileImage(session.profile_image));
           }
         } catch (error) {
-          // Silent error handling
+          // Silent error handling for non-critical errors
         }
       },
       "Profile.loadProfileImage",
       { showAlert: false }
     );
     loadProfileImage();
-  }, [session, freshToken, dispatch]);
+  }, [session, freshToken, dispatch, navigation]);
 
   /**
    * Update Redux store when profile data is fetched

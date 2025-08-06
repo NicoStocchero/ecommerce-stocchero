@@ -143,7 +143,13 @@ const EditProfile = ({ navigation }) => {
       if (!session?.local_id || !freshToken) {
         Alert.alert(
           "Error de Autenticación",
-          "No se pudo verificar tu identidad. Por favor, inicia sesión nuevamente."
+          "No se pudo verificar tu identidad. Por favor, inicia sesión nuevamente.",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("Login"),
+            },
+          ]
         );
         return;
       }
@@ -182,6 +188,30 @@ const EditProfile = ({ navigation }) => {
           throw new Error("Invalid response structure from API");
         }
       } catch (error) {
+        // Handle authentication errors
+        if (error?.status === 401 || error?.status === 403) {
+          Alert.alert(
+            "Error de Autenticación",
+            "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+            [
+              {
+                text: "OK",
+                onPress: () => navigation.navigate("Login"),
+              },
+            ]
+          );
+          return;
+        }
+
+        // Handle network errors
+        if (error?.status === 0 || error?.message?.includes("network")) {
+          Alert.alert(
+            "Error de Conexión",
+            "No se pudo conectar con el servidor. Verifica tu conexión a internet."
+          );
+          return;
+        }
+
         dispatch(
           setProfileError({
             message: "Error al actualizar el perfil",
