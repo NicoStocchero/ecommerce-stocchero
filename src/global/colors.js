@@ -37,6 +37,8 @@ const colors = {
 
   // Gray scale palette
   /** @type {string} Lightest gray - for backgrounds */
+  gray50: "#fafafa",
+  /** @type {string} Very light gray - for subtle backgrounds */
   gray100: "#f9f9f9",
   /** @type {string} Very light gray - for subtle backgrounds */
   gray200: "#f0f0f0",
