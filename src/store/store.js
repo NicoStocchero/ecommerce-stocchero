@@ -1,6 +1,7 @@
 /**
  * @fileoverview Redux store configuration using Redux Toolkit.
- * Combines reducers from cart, shop, auth slices and RTK Query APIs.
+ * Combines reducers from cart, shop, user slices and RTK Query APIs.
+ * Uses unified user state management to eliminate fragmentation.
  * @author Stocchero
  * @version 1.0.0
  */
@@ -8,13 +9,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import cartReducer from "../features/cart/cartSlice";
 import shopReducer from "../features/shop/shopSlice";
-import authReducer from "../features/auth/authSlice";
+import userReducer from "../features/user/userSlice";
 import { authApi } from "../services/auth/authApi";
 import { shopApi } from "../services/shop/shopApi";
+import { profileApi } from "../services/profile/profileApi";
+import { ordersApi } from "../services/orders/ordersApi";
 
 /**
  * Redux store configuration with all reducers and middleware.
- * Combines state slices for cart, shop, and authentication with RTK Query APIs.
+ * Combines state slices for cart, shop, and unified user management with RTK Query APIs.
  * Includes middleware for API caching and development tools integration.
  *
  * @example
@@ -33,13 +36,21 @@ export const store = configureStore({
     // State slices
     cart: cartReducer,
     shop: shopReducer,
-    auth: authReducer,
+    user: userReducer, // Unified user state (auth + profile)
+
     // RTK Query API slices
-    [shopApi.reducerPath]: shopApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
+    [shopApi.reducerPath]: shopApi.reducer,
+    [profileApi.reducerPath]: profileApi.reducer,
+    [ordersApi.reducerPath]: ordersApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(authApi.middleware, shopApi.middleware),
+    getDefaultMiddleware().concat(
+      authApi.middleware,
+      shopApi.middleware,
+      profileApi.middleware,
+      ordersApi.middleware
+    ),
   // Enable Redux DevTools in development
   devTools: process.env.NODE_ENV !== "production",
 });
