@@ -18,7 +18,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSignUpMutation } from "../../services/auth/authApi";
-import { authSuccess, authFailure } from "../../features/auth/authSlice";
+import { authSuccess, authFailure } from "../../features/user/userSlice";
 import colors from "../../global/colors";
 import { signUpSchema } from "../../schemas/authSchema";
 import {
@@ -87,7 +87,7 @@ const SignUp = ({ navigation }) => {
 
   // Redux hooks
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.user);
   const [signUp, { isLoading, error: apiError }] = useSignUpMutation();
 
   /**
@@ -144,33 +144,31 @@ const SignUp = ({ navigation }) => {
    * Validates form, calls signup API, and dispatches appropriate actions
    */
   const handleSignUp = async () => {
-    Keyboard.dismiss();
-    if (!validateForm(formData)) return;
+    try {
+      Keyboard.dismiss();
+      if (!validateForm(formData)) return;
 
-    const result = await signUp({
-      email: formData.email,
-      password: formData.password,
-      returnSecureToken: true,
-    });
+      const result = await signUp({
+        email: formData.email,
+        password: formData.password,
+        returnSecureToken: true,
+      });
 
-    if (result.data) {
-      dispatch(
-        authSuccess({
-          user: {
-            email: result.data.email,
-            localId: result.data.localId,
-          },
-          token: result.data.idToken,
-          refreshToken: result.data.refreshToken,
-        })
-      );
-    } else if (result.error) {
-      const errorMessage = getFirebaseErrorMessage(result.error, "signup");
-      dispatch(authFailure(errorMessage));
-      if (result.error.data?.error?.message === "EMAIL_EXISTS") {
-        setErrors((prev) => ({ ...prev, email: errorMessage }));
-        setTouched((prev) => ({ ...prev, email: true }));
+      if (result.data) {
+        dispatch(
+          authSuccess({
+            user: {
+              email: result.data.email,
+              localId: result.data.localId,
+            },
+            token: result.data.idToken,
+            refreshToken: result.data.refreshToken,
+          })
+        );
       }
+    } catch (error) {
+      const errorMessage = getFirebaseErrorMessage(error, "signup");
+      dispatch(authFailure(errorMessage));
     }
   };
 
@@ -285,7 +283,7 @@ export default SignUp;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.gray50,
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -293,42 +291,65 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingHorizontal: 20,
+    paddingVertical: 40,
   },
   header: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 40,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 32,
     fontFamily: "Inter_28pt-Bold",
-    color: colors.black,
-    marginBottom: 2,
+    color: colors.textPrimary,
+    marginBottom: 8,
+    letterSpacing: 0.5,
+    textAlign: "center",
   },
   microcopy: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: "Inter_18pt-Regular",
-    color: colors.gray,
+    color: colors.gray600,
     textAlign: "center",
-    marginBottom: 16,
-    marginTop: -6,
+    lineHeight: 22,
+    letterSpacing: 0.2,
+    paddingHorizontal: 20,
   },
   form: {
-    marginBottom: 32,
+    backgroundColor: colors.white,
+    borderRadius: 8,
+    padding: 24,
+    marginHorizontal: 20,
     gap: 20,
+    borderWidth: 1,
+    borderColor: colors.gray100,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   footer: {
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 24,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    backgroundColor: colors.white,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.gray100,
   },
   footerText: {
     fontSize: 14,
     fontFamily: "Inter_18pt-Regular",
-    color: colors.gray,
+    color: colors.gray600,
+    letterSpacing: 0.2,
   },
   linkText: {
     color: colors.primary,
     fontFamily: "Inter_18pt-SemiBold",
+    letterSpacing: 0.3,
   },
 });

@@ -25,7 +25,7 @@ import {
   authSuccess,
   authFailure,
   clearError,
-} from "../../features/auth/authSlice";
+} from "../../features/user/userSlice";
 import { FormInput, ErrorMessage, AuthButton } from "../../components/Auth";
 import { loginSchema } from "../../schemas/authSchema";
 import {
@@ -34,6 +34,8 @@ import {
   emptyErrors,
 } from "../../utils/validationHelpers";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrorMessage";
+import { useSQLite } from "../../hooks/useSQLite";
+import { handleError, withErrorHandling } from "../../utils/errorHandler";
 
 /**
  * Login screen component props
@@ -80,8 +82,48 @@ const Login = ({ navigation }) => {
 
   // Redux hooks
   const dispatch = useDispatch();
-  const { error, isAuthenticated } = useSelector((state) => state.auth);
+  const { error, isAuthenticated } = useSelector((state) => state.user);
   const [login, { isLoading }] = useLoginMutation();
+
+  // SQLite hooks
+  const { getSession, saveSession } = useSQLite();
+
+  /**
+   * Load session from SQLite on component mount
+   */
+  useEffect(() => {
+    const loadSession = withErrorHandling(
+      async () => {
+        const session = await getSession();
+
+        if (session && session.email) {
+          dispatch(
+            authSuccess({
+              user: {
+                email: session.email,
+                localId: session.localId,
+              },
+              token: session.token,
+              refreshToken: session.refreshToken,
+            })
+          );
+        }
+      },
+      "Login.loadSession",
+      { showAlert: false }
+    );
+
+    loadSession();
+  }, [getSession, dispatch]);
+
+  /**
+   * Navigate if authenticated
+   */
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigation.navigate("Home");
+    }
+  }, [isAuthenticated, navigation]);
 
   /**
    * Effect to clear form when user is authenticated
@@ -133,31 +175,41 @@ const Login = ({ navigation }) => {
    * Validates form, calls login API, and dispatches appropriate actions
    */
   const handleLogin = async () => {
-    Keyboard.dismiss();
-    if (!validateForm(formData)) return;
+    try {
+      Keyboard.dismiss();
+      if (!validateForm(formData)) return;
 
-    dispatch(clearError());
-    const result = await login({
-      email: formData.email,
-      password: formData.password,
-      returnSecureToken: true,
-    });
+      dispatch(clearError());
 
-    if (result.data) {
-      dispatch(
-        authSuccess({
-          user: {
-            email: result.data.email,
-            localId: result.data.localId,
-          },
+      const result = await login({
+        email: formData.email,
+        password: formData.password,
+        returnSecureToken: true,
+      });
+
+      if (result.data) {
+        // Save session to SQLite
+        await saveSession({
+          email: result.data.email,
+          localId: result.data.localId,
           token: result.data.idToken,
           refreshToken: result.data.refreshToken,
-        })
-      );
-    } else if (result.error) {
-      const errorMessage = getFirebaseErrorMessage(result.error, "login");
+        });
+
+        dispatch(
+          authSuccess({
+            user: {
+              email: result.data.email,
+              localId: result.data.localId,
+            },
+            token: result.data.idToken,
+            refreshToken: result.data.refreshToken,
+          })
+        );
+      }
+    } catch (error) {
+      const errorMessage = getFirebaseErrorMessage(error, "login");
       dispatch(authFailure(errorMessage));
-      Alert.alert("Error", errorMessage);
     }
   };
 
@@ -273,7 +325,7 @@ export default Login;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.gray50,
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -281,47 +333,71 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingHorizontal: 20,
+    paddingVertical: 40,
   },
   header: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 40,
+    paddingHorizontal: 20,
   },
   title: {
     fontFamily: "Inter_28pt-Bold",
     fontSize: 32,
-    color: colors.black,
-    marginBottom: 2,
+    color: colors.textPrimary,
+    marginBottom: 8,
+    letterSpacing: 0.5,
+    textAlign: "center",
   },
   microcopy: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: "Inter_18pt-Regular",
-    color: colors.gray,
+    color: colors.gray600,
     textAlign: "center",
-    marginBottom: 16,
-    marginTop: -6,
+    lineHeight: 22,
+    letterSpacing: 0.2,
+    paddingHorizontal: 20,
   },
   form: {
-    marginBottom: 32,
+    backgroundColor: colors.white,
+    borderRadius: 8,
+    padding: 24,
+    marginHorizontal: 20,
     gap: 20,
+    borderWidth: 1,
+    borderColor: colors.gray100,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   forgotButton: {
     alignSelf: "flex-end",
-    marginTop: -8,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
   forgotText: {
     fontFamily: "Inter_18pt-Medium",
     fontSize: 14,
     color: colors.primary,
+    letterSpacing: 0.2,
   },
   registerButton: {
-    paddingVertical: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginTop: 24,
     alignItems: "center",
+    backgroundColor: colors.white,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.gray100,
   },
   registerButtonText: {
     fontFamily: "Inter_18pt-SemiBold",
     fontSize: 16,
     color: colors.primary,
+    letterSpacing: 0.3,
   },
 });

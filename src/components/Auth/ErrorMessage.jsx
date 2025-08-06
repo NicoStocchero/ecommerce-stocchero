@@ -1,12 +1,13 @@
 /**
  * @fileoverview Error message component for displaying validation and authentication errors.
- * Provides consistent error styling and conditional rendering.
+ * Uses the modern Card component with Nike-inspired design.
  * @author Stocchero
  * @version 1.0.0
  */
 
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { Card } from "../UI";
 import colors from "../../global/colors";
 
 /**
@@ -16,39 +17,23 @@ import colors from "../../global/colors";
  */
 
 /**
- * Reusable error message component for displaying validation and authentication errors.
- * Conditionally renders based on message presence with consistent styling.
- *
- * @component
+ * Error message component using modern Card design
  * @param {ErrorMessageProps} props - Component props
  * @returns {React.JSX.Element|null} Rendered error message or null if no message
- *
- * @example
- * ```javascript
- * // Display authentication error
- * <ErrorMessage message={authError} />
- *
- * // Display validation error
- * <ErrorMessage message="El email es requerido" />
- *
- * // No error (component returns null)
- * <ErrorMessage message={null} />
- * ```
  */
 const ErrorMessage = ({ message }) => {
   if (!message) return null;
+  
   return (
-    <View style={styles.errorContainer}>
+    <Card variant="compact" elevated={false} style={styles.errorCard}>
       <Text style={styles.errorText}>{message}</Text>
-    </View>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create({
-  errorContainer: {
+  errorCard: {
     backgroundColor: colors.error,
-    padding: 12,
-    borderRadius: 8,
     marginBottom: 16,
   },
   errorText: {
