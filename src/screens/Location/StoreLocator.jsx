@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert, Linking } from "react-native";
 import { GoogleMap, MapControls, StoresList } from "../../components/Maps";
 import { StoreCard } from "../../components/UI";
 import { useLocation, useMapControl, useStoresData } from "../../hooks";
@@ -126,6 +126,40 @@ const StoreLocator = () => {
   };
 
   /**
+   * Handle store details button press
+   */
+  const handleStoreDetails = (store) => {
+    Alert.alert(
+      store.title,
+      `¿Qué te gustaría hacer?\n\n📍 ${store.address}\n🕒 ${store.hours}`,
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Abrir en Maps",
+          onPress: () => {
+            const { latitude, longitude } = store.coordinates;
+            const url = `https://maps.google.com/maps?q=${latitude},${longitude}`;
+            Linking.openURL(url);
+          },
+        },
+        {
+          text: "Llamar",
+          onPress: () => {
+            if (store.phone) {
+              Linking.openURL(`tel:${store.phone}`);
+            } else {
+              Alert.alert("Información", "Número de teléfono no disponible");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  /**
    * Format services array for display
    */
   const formatServices = (services) => {
@@ -161,17 +195,6 @@ const StoreLocator = () => {
         onStoreSelect={handleStoreSelect}
         formatServices={formatServices}
       />
-
-      {selectedStore && (
-        <View style={styles.storeDetailsContainer}>
-          <StoreCard
-            store={selectedStore}
-            variant="featured"
-            selected={true}
-            formatServices={formatServices}
-          />
-        </View>
-      )}
     </View>
   );
 };
@@ -211,10 +234,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: colors.gray100,
-  },
-  storeDetailsContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
   },
 });
 
