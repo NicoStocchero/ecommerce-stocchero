@@ -9,7 +9,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { useWindowDimensions } from "react-native";
-import { ShopStack, CartStack, OrderStack } from "./stack";
+import { ShopStack, CartStack, OrderStack, ProfileStack } from "./stack";
 import colors from "../global/colors";
 
 /**
@@ -78,6 +78,21 @@ const CartTabIcon = ({ focused, iconSize }) => (
 const OrderTabIcon = ({ focused, iconSize }) => (
   <TabBarIcon
     name={focused ? "receipt" : "receipt-outline"}
+    color={focused ? colors.primary : colors.gray}
+    size={iconSize}
+  />
+);
+
+/**
+ * Profile tab icon with focus-based styling.
+ *
+ * @component
+ * @param {IndividualTabIconProps} props - Component props
+ * @returns {React.JSX.Element} Rendered profile tab icon
+ */
+const ProfileTabIcon = ({ focused, iconSize }) => (
+  <TabBarIcon
+    name={focused ? "person" : "person-outline"}
     color={focused ? colors.primary : colors.gray}
     size={iconSize}
   />
@@ -166,6 +181,15 @@ const TabNavigator = () => {
         options={{
           tabBarIcon: ({ focused }) => (
             <OrderTabIcon focused={focused} iconSize={iconSize} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Perfil"
+        component={ProfileStack}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <ProfileTabIcon focused={focused} iconSize={iconSize} />
           ),
         }}
       />

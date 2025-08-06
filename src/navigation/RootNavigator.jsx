@@ -30,7 +30,7 @@ import { AuthStack } from "./stack";
  * ```
  */
 const RootNavigator = () => {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.user);
 
   return (
     <NavigationContainer>
