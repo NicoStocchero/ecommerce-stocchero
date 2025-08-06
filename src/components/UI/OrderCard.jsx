@@ -63,12 +63,16 @@ const OrderCard = ({ order, onPress, variant = "default" }) => {
   };
 
   const formatOrderId = (id) => {
-    // Take everything after "OX-"
-    if (id && id.includes("OX-")) {
-      const afterOX = id.split("OX-")[1];
-      return afterOX.substring(0, 6).toUpperCase(); // Take first 6 characters
+    if (!id) return "N/A";
+
+    // Remove any leading/trailing dashes and take first 8 characters
+    const cleanId = id.replace(/^-+|-+$/g, "");
+
+    if (cleanId.length >= 8) {
+      return cleanId.substring(0, 8).toUpperCase();
     }
-    return id;
+
+    return cleanId.toUpperCase();
   };
 
   return (
@@ -142,9 +146,9 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     fontFamily: "Inter_18pt-Bold",
-    fontSize: 16,
+    fontSize: 18,
     color: colors.textPrimary,
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
   statusBadge: {
     flexDirection: "row",

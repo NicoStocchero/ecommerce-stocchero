@@ -23,7 +23,17 @@ export const ordersApi = createApi({
       }),
       invalidatesTags: ["Orders"],
       transformErrorResponse: (response) => {
-        return getFirebaseErrorMessage(response.data?.error?.message);
+        // Handle authentication errors specifically
+        if (response.status === 401 || response.status === 403) {
+          return "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.";
+        }
+
+        // Handle other errors
+        if (response.data?.error?.message) {
+          return getFirebaseErrorMessage(response.data.error.message);
+        }
+
+        return "Error al crear el pedido. Intenta nuevamente.";
       },
     }),
 
@@ -45,7 +55,17 @@ export const ordersApi = createApi({
         }));
       },
       transformErrorResponse: (response) => {
-        return getFirebaseErrorMessage(response.data?.error?.message);
+        // Handle authentication errors specifically
+        if (response.status === 401 || response.status === 403) {
+          return "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.";
+        }
+
+        // Handle other errors
+        if (response.data?.error?.message) {
+          return getFirebaseErrorMessage(response.data.error.message);
+        }
+
+        return "Error al cargar los pedidos. Intenta nuevamente.";
       },
     }),
   }),

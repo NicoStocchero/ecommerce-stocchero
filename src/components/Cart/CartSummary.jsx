@@ -72,6 +72,25 @@ const CartSummary = ({ totalPrice, totalQuantity, onClearCart, cartItems }) => {
         [{ text: "OK", onPress: () => onClearCart() }]
       );
     } catch (error) {
+      // Handle authentication errors specifically
+      if (error?.message?.includes("sesión ha expirado")) {
+        Alert.alert(
+          "Error de Autenticación",
+          "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Navigate to login - you might need to pass navigation prop
+                // navigation.navigate("Login");
+              },
+            },
+          ]
+        );
+        return;
+      }
+
+      // Handle other errors
       Alert.alert(
         "Error en la compra",
         error.message || "No se pudo completar la compra. Intenta nuevamente."
