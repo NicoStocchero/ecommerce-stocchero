@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "name": "Club Renace Villa Allende",
+    "address": "Av. San Luis esquina García Lorca, Villa Allende, Córdoba",
+    "coordinates": {
+      "latitude": -31.302313,
+      "longitude": -64.282284
+    },
+    "phone": "03543-425678",
+    "hours": "Lun-Dom 8-22hs",
+    "description": "Club principal con canchas de pádel, tienda y bar en Villa Allende",
+    "pinColor": "#FF7600",
+    "services": ["Canchas de pádel", "Tienda oficial", "Bar y eventos"],
+    "rating": 4.9,
+    "reviews": 432
+  },
+  {
+    "id": 2,
+    "name": "Renace Paseo Rivera",
+    "address": "Paseo Rivera Indarte, Av. Ricardo Rojas 8500, Córdoba",
+    "coordinates": {
+      "latitude": -31.33385,
+      "longitude": -64.290093
+    },
+    "phone": "0351-487-1010",
+    "hours": "Lun-Sáb 10-20hs",
+    "description": "Local dentro de Paseo Rivera con productos exclusivos Renace",
+    "pinColor": "#FF7600",
+    "services": ["Tienda física", "Retiro en tienda", "Asesoramiento técnico"],
+    "rating": 4.8,
+    "reviews": 158
+  },
+  {
+    "id": 3,
+    "name": "Renace Patio Olmos",
+    "address": "Av. Vélez Sarsfield 361, Córdoba Capital",
+    "coordinates": {
+      "latitude": -31.420072,
+      "longitude": -64.188484
+    },
+    "phone": "0351-421-5050",
+    "hours": "Lun-Dom 10-21hs",
+    "description": "Espacio Renace en pleno centro comercial Patio Olmos",
+    "pinColor": "#FF7600",
+    "services": ["Tienda urbana", "Accesorios express", "Pickup online"],
+    "rating": 4.7,
+    "reviews": 110
+  },
+  {
+    "id": 4,
+    "name": "Renace Paseo del Jockey",
+    "address": "Elías Yofre 1050, Córdoba Capital",
+    "coordinates": {
+      "latitude": -31.451075,
+      "longitude": -64.181299
+    },
+    "phone": "0351-482-7777",
+    "hours": "Lun-Dom 10-22hs",
+    "description": "Showroom exclusivo en Paseo del Jockey con lanzamientos especiales",
+    "pinColor": "#FF7600",
+    "services": [
+      "Productos premium",
+      "Descuentos exclusivos",
+      "Consultores técnicos"
+    ],
+    "rating": 4.9,
+    "reviews": 98
+  },
+  {
+    "id": 5,
+    "name": "Renace Córdoba Shopping",
+    "address": "José Antonio de Goyechea 2851, Córdoba Capital",
+    "coordinates": {
+      "latitude": -31.381022,
+      "longitude": -64.214919
+    },
+    "phone": "0351-499-2233",
+    "hours": "Lun-Dom 10-22hs",
+    "description": "Local moderno en Córdoba Shopping con experiencia integral Renace",
+    "pinColor": "#FF7600",
+    "services": [
+      "Retiro en tienda",
+      "Asesoramiento técnico",
+      "Cambios y devoluciones"
+    ],
+    "rating": 4.85,
+    "reviews": 135
+  }
+]
