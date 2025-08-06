@@ -55,15 +55,15 @@ const Search = ({ keyword, setKeyword }) => {
       <Ionicons
         name="search"
         size={20}
-        color={colors.gray}
+        color={isActive ? colors.primary : colors.gray600}
         style={styles.icon}
       />
       <TextInput
         value={keyword}
         onChangeText={setKeyword}
-        placeholder="Buscar"
+        placeholder="Buscar productos..."
         style={styles.input}
-        placeholderTextColor={colors.gray}
+        placeholderTextColor={colors.gray500}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
       />
@@ -78,22 +78,36 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.gray,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    margin: 12,
+    borderWidth: 1.5,
+    borderColor: colors.gray300,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    marginVertical: 8,
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   containerFocused: {
-    borderColor: colors.red,
+    borderColor: colors.primary,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
   },
   icon: {
-    marginRight: 8,
+    marginRight: 12,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: colors.black,
+    fontFamily: "Inter_18pt-Regular",
+    color: colors.textPrimary,
+    letterSpacing: 0.2,
   },
 });
